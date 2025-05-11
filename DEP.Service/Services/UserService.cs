@@ -119,41 +119,6 @@ namespace DEP.Service.Services
             };
         }
 
-        //public async Task<UserViewModel> AddUser(AddUserViewModel viewModel)
-        //{
-        //    var defaultPass = configuration.GetSection("UserSettings:DefaultPassword").Value;
-        //    authService.CreatePasswordHash(defaultPass, out byte[] passwordHash, out byte[] passwordSalt);
-
-        //    User newUser = new User
-        //    {
-        //        UserName = viewModel.Username,
-        //        Name = viewModel.Name,
-        //        LocationId = viewModel.LocationId,
-        //        DepartmentId = viewModel.DepartmentId,
-        //        EducationBossId = viewModel.EducationBossId,
-        //        PasswordHash = passwordHash,
-        //        PasswordSalt = passwordSalt,
-        //        UserRole = viewModel.UserRole,
-        //        PasswordExpiryDate = DateTime.Now.AddDays(-1)
-        //    };
-
-        //    var createdUser = await userRepository.AddUser(newUser);
-
-        //    return new UserViewModel
-        //    {
-        //        UserId = createdUser.UserId,
-        //        Name = createdUser.Name,
-        //        LocationId = createdUser.LocationId,
-        //        LocationName = createdUser.Location?.Name,
-        //        DepartmentId = createdUser.DepartmentId,
-        //        DepartmentName = createdUser.Department?.Name,
-        //        EducationBossId = createdUser.EducationBossId,
-        //        EducationBossName = createdUser.EducationBoss?.Name,
-        //        UserRole = createdUser.UserRole
-        //    };
-        //}
-
-
         public async Task<bool> ReassignUser(ReassignUserViewModel model)
         {
             return await userRepository.ReassignUser(model);
