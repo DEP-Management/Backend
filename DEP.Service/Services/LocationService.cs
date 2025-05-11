@@ -1,5 +1,6 @@
 ﻿using DEP.Repository.Interfaces;
 using DEP.Repository.Models;
+using DEP.Service.EncryptionHelpers;
 using DEP.Service.Interfaces;
 
 namespace DEP.Service.Services
@@ -7,10 +8,17 @@ namespace DEP.Service.Services
     public class LocationService : ILocationService
     {
         private readonly ILocationRepository repo;
-        public LocationService(ILocationRepository repo) { this.repo = repo; }
+        private readonly IEncryptionService encryptionService;
+
+        public LocationService(ILocationRepository repo, IEncryptionService encryptionService)
+        {
+            this.repo = repo;
+            this.encryptionService = encryptionService;
+        }
 
         public async Task<bool> AddLocation(Location location)
         {
+            LocationEncryptionHelper.Encrypt(location, encryptionService);
             return await repo.AddLocation(location);
         }
 
@@ -21,22 +29,61 @@ namespace DEP.Service.Services
 
         public async Task<List<Location>> GetLocations()
         {
-            return await repo.GetLocations();
+            var locations = await repo.GetLocations();
+            locations.ForEach(loc => LocationEncryptionHelper.Decrypt(loc, encryptionService));
+            return locations;
         }
 
         public async Task<Location> GetLocationById(int id)
         {
-            return await repo.GetLocationById(id);
-        }
-
-        public async Task<Location> GetLocationByName(string name)
-        {
-            return await repo.GetLocationByName(name);
+            var loc = await repo.GetLocationById(id);
+            if (loc != null)
+            {
+                LocationEncryptionHelper.Decrypt(loc, encryptionService);
+            }
+            return loc;
         }
 
         public async Task<bool> UpdateLocation(Location location)
         {
+            LocationEncryptionHelper.Encrypt(location, encryptionService);
             return await repo.UpdateLocation(location);
         }
     }
+
+    //public class LocationService : ILocationService
+    //{
+    //    private readonly ILocationRepository repo;
+    //    public LocationService(ILocationRepository repo) { this.repo = repo; }
+
+    //    public async Task<bool> AddLocation(Location location)
+    //    {
+    //        return await repo.AddLocation(location);
+    //    }
+
+    //    public async Task<bool> DeleteLocation(int id)
+    //    {
+    //        return await repo.DeleteLocation(id);
+    //    }
+
+    //    public async Task<List<Location>> GetLocations()
+    //    {
+    //        return await repo.GetLocations();
+    //    }
+
+    //    public async Task<Location> GetLocationById(int id)
+    //    {
+    //        return await repo.GetLocationById(id);
+    //    }
+
+    //    public async Task<Location> GetLocationByName(string name)
+    //    {
+    //        return await repo.GetLocationByName(name);
+    //    }
+
+    //    public async Task<bool> UpdateLocation(Location location)
+    //    {
+    //        return await repo.UpdateLocation(location);
+    //    }
+    //}
 }

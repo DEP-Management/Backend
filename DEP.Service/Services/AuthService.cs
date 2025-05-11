@@ -15,46 +15,53 @@ namespace DEP.Service.Services
     {
         private readonly IUserRepository userRepo;
         private readonly IConfiguration configuration;
+        private readonly IEncryptionService encryptionService;
 
-        public AuthService(IUserRepository userRepo, IConfiguration configuration)
+        public AuthService(IUserRepository userRepo, IConfiguration configuration, IEncryptionService encryptionService)
         {
             this.userRepo = userRepo;
             this.configuration = configuration;
+            this.encryptionService = encryptionService;
         }
 
         public async Task<AuthenticatedResponse> Login(LoginViewModel loginRequest)
         {
-            var user = await userRepo.GetUserByUsername(loginRequest.Username);
+            var allUsers = await userRepo.GetUsers(); // load all users
 
-            if (user is null)
+            User? matchedUser = null;
+
+            foreach (var user in allUsers)
+            {
+                var decryptedUsername = encryptionService.Decrypt(user.UserName);
+                if (decryptedUsername.Equals(loginRequest.Username, StringComparison.OrdinalIgnoreCase))
+                {
+                    matchedUser = user;
+                    break;
+                }
+            }
+
+            if (matchedUser == null)
             {
                 return null;
             }
 
-            // Check if password is correct
-            if (!VerifyPasswordHash(loginRequest.Password, user.PasswordHash, user.PasswordSalt))
+            if (!VerifyPasswordHash(loginRequest.Password, matchedUser.PasswordHash, matchedUser.PasswordSalt))
             {
                 return null;
             }
 
-            string newAccessToken = CreateJwtToken(user);
+            string newAccessToken = CreateJwtToken(matchedUser);
             string newRefreshToken = await CreateRefreshToken();
-            user.RefreshToken = newRefreshToken;
-            user.RefreshTokenExpiryDate = DateTime.Now.AddDays(1);
-            await userRepo.UpdateUser(user);
+            matchedUser.RefreshToken = newRefreshToken;
+            matchedUser.RefreshTokenExpiryDate = DateTime.Now.AddDays(1);
+            await userRepo.UpdateUser(matchedUser);
 
-            AuthenticatedResponse auth = new AuthenticatedResponse()
+            return new AuthenticatedResponse
             {
-                //UserId = user.UserId,
-                //Name = user.Name,
-                //UserRole = user.UserRole,
-                //Username = loginRequest.Username,
                 AccessToken = newAccessToken,
                 RefreshToken = newRefreshToken,
-                PasswordExpiryDate = user.PasswordExpiryDate,
+                PasswordExpiryDate = matchedUser.PasswordExpiryDate,
             };
-
-            return auth;
         }
 
         public enum ChangePasswordResult
@@ -141,6 +148,8 @@ namespace DEP.Service.Services
 
         public string CreateJwtToken(User user)
         {
+            user.Name = encryptionService.Decrypt(user.Name);
+
             // Adding claims, claims are Key-Value pairs that can be used after the token is decoded.
             List<Claim> claims = new List<Claim>
             {
@@ -150,11 +159,13 @@ namespace DEP.Service.Services
                 //new Claim(ClaimTypes.NameIdentifier, user.Name.ToString()),
                 new Claim("roleId", ((int)user.UserRole).ToString())
             };
+
+            user.Name = encryptionService.Encrypt(user.Name);
             var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetSection("AppSettings:Token").Value));
             var signInCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
             var tokeOptions = new JwtSecurityToken(
                 claims: claims,
-                expires: DateTime.Now.AddSeconds(5),
+                expires: DateTime.Now.AddMinutes(10),
                 signingCredentials: signInCredentials
                 );
 

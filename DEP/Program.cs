@@ -4,9 +4,11 @@ using DEP.Repository.Repositories;
 using DEP.Service.Interfaces;
 using DEP.Service.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
+using System;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -70,6 +72,7 @@ builder.Services.AddScoped<IPersonService, PersonService>();
 builder.Services.AddScoped<IPersonCourseRepository, PersonCourseRepository>();
 builder.Services.AddScoped<IPersonCourseService, PersonCourseService>();
 builder.Services.AddScoped<IStatisticsService, StatisticsService>();
+builder.Services.AddScoped<IEncryptionService, EncryptionService>();
 
 builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 var app = builder.Build();
@@ -90,5 +93,15 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Apply migrations if needed
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
+    db.Database.Migrate(); // Applies any pending migrations
+
+    // Call the seeding logic
+    await DatabaseSeeder.SeedAdminAsync(scope.ServiceProvider);
+}
 
 app.Run();

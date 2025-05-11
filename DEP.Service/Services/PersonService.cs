@@ -1,6 +1,9 @@
-﻿using DEP.Repository.Interfaces;
+﻿using System;
+using System.Reflection.Metadata.Ecma335;
+using DEP.Repository.Interfaces;
 using DEP.Repository.Models;
 using DEP.Repository.Repositories;
+using DEP.Service.EncryptionHelpers;
 using DEP.Service.Interfaces;
 using DEP.Service.ViewModels;
 using DEP.Service.ViewModels.Statistic;
@@ -10,11 +13,11 @@ namespace DEP.Service.Services
     public class PersonService : IPersonService
     {
         private readonly IPersonRepository repo;
-        private readonly IDepartmentRepository departmentRepository;
-        public PersonService(IPersonRepository repo, IDepartmentRepository departmentRepo)
+        private readonly IEncryptionService encryptionService;
+        public PersonService(IPersonRepository repo, IEncryptionService encryptionService)
         {
             this.repo = repo;
-            this.departmentRepository = departmentRepo;
+            this.encryptionService = encryptionService;
         }
 
         public async Task<Person?> AddPerson(Person person)
@@ -23,6 +26,8 @@ namespace DEP.Service.Services
             person.HiringDate = TimeZoneInfo.ConvertTimeFromUtc(person.HiringDate, localTimeZone);
             person.HiringDate = person.HiringDate.Date;
             person.EndDate = person.HiringDate.AddYears(4);
+
+            PersonEncryptionHelper.Encrypt(person, encryptionService);
             return await repo.AddPerson(person);
         }
 
@@ -31,30 +36,43 @@ namespace DEP.Service.Services
             return await repo.DeletePerson(id);
         }
 
-        public Task<Person> GetPersonById(int personId)
+        public async Task<Person> GetPersonById(int personId)
         {
-            return repo.GetPersonById(personId);
+            var person = await repo.GetPersonById(personId);
+
+            PersonEncryptionHelper.Decrypt(person, encryptionService);
+
+            return person;
         }
-        //public Task<Person> GetPersonById(int personId, int roleId)
-        //{
-        //    return repo.GetPersonById(personId, roleId);
-        //}
 
         public async Task<List<Person>> GetPersons()
         {
-            return await repo.GetPersons();
+            var persons = await repo.GetPersons();
+
+            PersonEncryptionHelper.Decrypt(persons, encryptionService);
+
+            return persons;
         }
-        
+
         public async Task<List<Person>> GetPersonsExcel(int leaderId)
         {
-            return await repo.GetPersonsExcel(leaderId);
+            var persons = await repo.GetPersonsExcel(leaderId);
+
+            PersonEncryptionHelper.Decrypt(persons, encryptionService);
+
+            return persons;
         }
         
         public async Task<List<Person>> GetPersonExcel(int id)
         {
             var personList = new List<Person>();
 
-            personList.Add(await repo.GetPersonExcel(id));
+            var person = await repo.GetPersonExcel(id);
+
+            PersonEncryptionHelper.Decrypt(person, encryptionService);
+
+            personList.Add(person);
+            //personList.Add(await repo.GetPersonExcel(id));
 
             return personList;
         }
@@ -62,7 +80,11 @@ namespace DEP.Service.Services
 
         public async Task<List<Person>> GetPersonsByCourseId(int courseId)
         {
-            return await repo.GetPersonsByCourseId(courseId);
+            var persons = await repo.GetPersonsByCourseId(courseId);
+
+            PersonEncryptionHelper.Decrypt(persons, encryptionService);
+
+            return persons;
         }
 
         public async Task<List<Person>> GetPersonsByEducationalLeaderId(int leaderId)
@@ -73,11 +95,6 @@ namespace DEP.Service.Services
         public async Task<List<Person>> GetPersonsByDepartmentAndLocation(int departmentId, int locationId)
         {
             return await repo.GetPersonsByDepartmentAndLocation(departmentId, locationId);
-        }
-
-        public async Task<List<Person>> GetPersonsByName(string name)
-        {
-            return await repo.GetPersonsByName(name);
         }
 
         public async Task<List<Person>> GetPersonsNotInCourse(int courseId)
@@ -114,6 +131,7 @@ namespace DEP.Service.Services
 
         public async Task<bool> UpdatePerson(Person person)
         {
+            PersonEncryptionHelper.Encrypt(person, encryptionService);
             return await repo.UpdatePerson(person);
         }
     }

@@ -24,12 +24,6 @@ namespace DEP.Controllers
             return Ok(await service.GetLocationById(id));
         }
 
-        [HttpGet("{name}"), Authorize]
-        public async Task<IActionResult> GetLocationByName(string name)
-        {
-            return Ok(await service.GetLocationByName(name));
-        }
-
         [HttpDelete("{id:int}"), Authorize]
         public async Task<IActionResult> DeleteLocation(int id)
         {
@@ -42,7 +36,6 @@ namespace DEP.Controllers
 
             return Ok(true);
         }
-
 
         [HttpPut, Authorize]
         public async Task<IActionResult> UpdateLocation(Location location)
