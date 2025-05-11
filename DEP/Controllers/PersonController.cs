@@ -77,41 +77,10 @@ namespace DEP.Controllers
             return Ok(person);
         }
 
-        //[HttpGet("{personId:int}/role/{roleId:int}"), Authorize]
-        //public async Task<IActionResult> GetPersonById(int personId, int roleId)
-        //{
-        //    try
-        //    {
-        //        var person = await service.GetPersonById(personId, roleId);
-        //        if (person is null)
-        //        {
-        //            return NotFound($"Unable to find person with ID = {personId}");
-        //        }
-        //        return Ok(person);
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        return BadRequest(e.Message);
-        //    }
-        //}
-
         [HttpGet("departmentId/{departmentId}/locationId{locationId}"), Authorize]
         public async Task<IActionResult> GetPersonsFromLocationAndDepartment(int departmentId, int locationId)
         {
             return Ok(await service.GetPersonsByDepartmentAndLocation(departmentId, locationId));
-        }
-
-        [HttpGet("{name}"), Authorize]
-        public async Task<IActionResult> GetPersonByName(string name)
-        {
-            try
-            {
-                return Ok(await service.GetPersonsByName(name));
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
         }
 
         [HttpPost, Authorize]

@@ -35,7 +35,10 @@ namespace DEP.Repository.Context
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
-            optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB; Initial Catalog=DEP; Integrated Security=True; TrustServerCertificate=True;");
+            // For SKP laptops.
+            //optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB; Initial Catalog=DEP; Integrated Security=True; TrustServerCertificate=True;");
+            optionsBuilder.UseSqlServer("Data Source=localhost; Initial Catalog=DEP; Integrated Security=True; TrustServerCertificate=True;");
+
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -133,32 +136,6 @@ namespace DEP.Repository.Context
                 .HasOne(ftur => ftur.FileTag)
                 .WithMany(ft => ft.FileTagUserRoles)
                 .HasForeignKey(ftur => ftur.FileTagId);
-
-            var defaultPass = configuration.GetSection("UserSettings:DefaultPassword").Value;
-            CreatePasswordHash(defaultPass, out byte[] passwordHash, out byte[] passwordSalt);
-
-            // Creates a Super_Admin user when the DB is created through add-migration/update-database
-            modelBuilder.Entity<User>().HasData(new User
-            {
-                UserId = 1,
-                Name = "Administrator",
-                UserName = "admin",
-                PasswordHash = passwordHash,
-                PasswordSalt = passwordSalt,
-                UserRole = 0,
-                PasswordExpiryDate = DateTime.Now.AddDays(-1),
-                RefreshTokenExpiryDate = DateTime.Now.AddDays(1),
-            });
         }
-
-        public void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
-        {
-            using (var hmac = new HMACSHA512())
-            {
-                passwordSalt = hmac.Key;
-                passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-            }
-        }
-
     }
 }

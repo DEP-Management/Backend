@@ -1,5 +1,6 @@
 ﻿using DEP.Repository.Interfaces;
 using DEP.Repository.Models;
+using DEP.Service.EncryptionHelpers;
 using DEP.Service.Interfaces;
 using DEP.Service.ViewModels.Statistic;
 
@@ -11,18 +12,26 @@ namespace DEP.Service.Services
         private readonly IDepartmentRepository departmentRepository;
         private readonly ILocationRepository locationRepository;
         private readonly IPersonCourseRepository personCourseRepository;
+        private readonly IEncryptionService encryptionService;
 
-        public StatisticsService(IPersonRepository personRepository, IDepartmentRepository departmentRepository, ILocationRepository locationRepository, IPersonCourseRepository personCourseRepository)
+        public StatisticsService(IPersonRepository personRepository, IDepartmentRepository departmentRepository, ILocationRepository locationRepository, IPersonCourseRepository personCourseRepository, IEncryptionService encryptionService)
         {
             this.personRepository = personRepository;
             this.departmentRepository = departmentRepository;
             this.locationRepository = locationRepository;
             this.personCourseRepository = personCourseRepository;
+            this.encryptionService = encryptionService;
         }
 
         public async Task<List<PersonPerDepartmentViewModel>> GetPersonsPerDepartmentByModule(int moduleId)
         {
             var departments = await departmentRepository.GetDepartments();
+
+            foreach (var dep in departments)
+            {
+                DepartmentEncryptionHelper.Decrypt(dep, encryptionService);
+            }
+
             var persons = await personRepository.GetPersonsByModuleId(moduleId);
 
             // Group persons by DepartmentId and count them
@@ -63,6 +72,12 @@ namespace DEP.Service.Services
         public async Task<List<PersonPerDepartmentViewModel>> GetPersonsPerDepartment()
         {
             var departments = await departmentRepository.GetDepartments();
+
+            foreach (var dep in departments)
+            {
+                DepartmentEncryptionHelper.Decrypt(dep, encryptionService);
+            }
+
             var persons = await personRepository.GetPersons();
 
             // Group persons by DepartmentId and count them
@@ -103,6 +118,12 @@ namespace DEP.Service.Services
         public async Task<List<PersonPerLocationViewModel>> GetPersonsPerLocation()
         {
             var locations = await locationRepository.GetLocations();
+
+            foreach (var loc in locations)
+            {
+                LocationEncryptionHelper.Decrypt(loc, encryptionService);
+            }
+
             var persons = await personRepository.GetPersons();
 
             // Group persons by LocationId and count them
@@ -174,7 +195,19 @@ namespace DEP.Service.Services
         public async Task<PersonPerDepartmentAndLocationViewModel> GetPersonsPerDepartmentAndLocation()
         {
             var departments = await departmentRepository.GetDepartments();
+
+            foreach (var dep in departments)
+            {
+                DepartmentEncryptionHelper.Decrypt(dep, encryptionService);
+            }
+
             var locations = await locationRepository.GetLocations();
+
+            foreach (var loc in locations)
+            {
+                LocationEncryptionHelper.Decrypt(loc, encryptionService);
+            }
+
             var persons = await personRepository.GetPersons();
 
             // Group persons by DepartmentId and count them

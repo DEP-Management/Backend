@@ -1,6 +1,7 @@
 ﻿using DEP.Repository.Interfaces;
 using DEP.Repository.Models;
 using DEP.Repository.ViewModels;
+using DEP.Service.EncryptionHelpers;
 using DEP.Service.Interfaces;
 using DEP.Service.ViewModels;
 using Microsoft.Extensions.Configuration;
@@ -13,29 +14,43 @@ namespace DEP.Service.Services
         private readonly IAuthService authService;
         private readonly IConfiguration configuration;
         private readonly IPersonRepository personRepository;
+        private readonly IEncryptionService encryptionService;
 
-        public UserService(IUserRepository userRepository, IAuthService authService, IConfiguration configuration, IPersonRepository personRepository)
+        public UserService(
+            IUserRepository userRepository, 
+            IAuthService authService, 
+            IConfiguration configuration, 
+            IPersonRepository personRepository, 
+            IEncryptionService encryptionService)
         {
             this.userRepository = userRepository;
             this.authService = authService;
             this.configuration = configuration;
             this.personRepository = personRepository;
+            this.encryptionService = encryptionService;
         }
 
         public async Task<List<User>> GetUsers()
         {
-            return await userRepository.GetUsers();
+            var users = await userRepository.GetUsers();
+            UserEncryptionHelper.Decrypt(users, encryptionService);
+            return users;
         }
 
         public async Task<List<User>> GetUsersByEducationBossId(int id)
         {
             var leaders = await userRepository.GetUsersByEducationBossId(id);
+
+            UserEncryptionHelper.Decrypt(leaders, encryptionService);
+
             return leaders;
         }
 
         public async Task<List<User>> GetUsersByUserRole(UserRole userRole)
         {
-            return await userRepository.GetUsersByUserRole(userRole);
+            var users = await userRepository.GetUsersByUserRole(userRole);
+            UserEncryptionHelper.Decrypt(users, encryptionService);
+            return users;
         }
 
         public async Task<User> GetUserById(int id)
@@ -45,7 +60,14 @@ namespace DEP.Service.Services
 
         public async Task<UserDashboardViewModel?> GetUserDashboardById(int id)
         {
-            return await userRepository.GetUserDashboardById(id);
+            var userDashBoard = await userRepository.GetUserDashboardById(id);
+
+            if (userDashBoard is not null)
+            {
+                UserEncryptionHelper.Decrypt(userDashBoard, encryptionService);
+            }
+
+            return userDashBoard;
         }
 
         public async Task<List<User>> GetUserByName(string name)
@@ -76,7 +98,12 @@ namespace DEP.Service.Services
                 PasswordExpiryDate = DateTime.Now.AddDays(-1)
             };
 
+            UserEncryptionHelper.Encrypt(newUser, encryptionService);
+
             var createdUser = await userRepository.AddUser(newUser);
+
+            // Optional: Decrypt here if you're returning decrypted data
+            UserEncryptionHelper.Decrypt(createdUser, encryptionService);
 
             return new UserViewModel
             {
@@ -92,7 +119,6 @@ namespace DEP.Service.Services
             };
         }
 
-
         public async Task<bool> ReassignUser(ReassignUserViewModel model)
         {
             return await userRepository.ReassignUser(model);
@@ -105,6 +131,7 @@ namespace DEP.Service.Services
 
         public async Task<bool> UpdateUser(User user)
         {
+            //UserEncryptionHelper.Encrypt(user, encryptionService);
             return await userRepository.UpdateUser(user);
         }
 
@@ -153,6 +180,8 @@ namespace DEP.Service.Services
             user.LocationId = viewModel.LocationId;
             user.UserRole = viewModel.UserRole;
 
+            UserEncryptionHelper.EncryptUpdatableFields(user, encryptionService);
+
             return await userRepository.UpdateUser(user);
         }
 
@@ -181,6 +210,9 @@ namespace DEP.Service.Services
         public async Task<List<EducationBossViewModel>> GetEducationBossesExcel()
         {
             var bosses = await userRepository.GetEducationBossesExcel();
+
+            UserEncryptionHelper.Decrypt(bosses, encryptionService);
+
             var viewModel = new List<EducationBossViewModel>();
 
             foreach (var boss in bosses)
@@ -189,8 +221,9 @@ namespace DEP.Service.Services
                 // Fetch leaders under this boss
                 foreach (var leader in boss.EducationLeaders)
                 {
+                    //UserEncryptionHelper.Decrypt(boss.EducationLeaders, encryptionService);
                     var persons = await personRepository.GetPersonsExcel(leader.UserId);
-
+                    //PersonEncryptionHelper.Decrypt(persons, encryptionService);
                     var EducationalleaderViewModel = new EducationLeaderViewModel
                     {
                         UserId = leader.UserId,

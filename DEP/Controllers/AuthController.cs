@@ -96,7 +96,7 @@ namespace DEP.Controllers
 
             var user = await userService.GetUserById(authResponse.UserId);
 
-            if (user.RefreshTokenExpiryDate <= DateTime.Now)
+            if (user is null || user.RefreshTokenExpiryDate <= DateTime.Now)
             {
                 return Unauthorized("Din session er udløbet, log venligst ind igen.");
             }
