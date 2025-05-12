@@ -14,7 +14,13 @@ namespace DEP.Controllers
 
         public PersonController(IPersonService service) { this.service = service; }
 
-        [HttpGet, Authorize]
+        [HttpGet, Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Uddannelseschef) + "," +
+    nameof(UserRole.Uddannelsesleder) + "," +
+    nameof(UserRole.Administrator) + "," +
+    nameof(UserRole.Controller))]
         public async Task<IActionResult> GetPersons()
         {
             try
@@ -27,7 +33,13 @@ namespace DEP.Controllers
             }
         }
         
-        [HttpGet("personsexcel/{leaderId:int}"), Authorize]
+        [HttpGet("personsexcel/{leaderId:int}"), Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Uddannelseschef) + "," +
+    nameof(UserRole.Uddannelsesleder) + "," +
+    nameof(UserRole.Human_Resources) + "," +
+    nameof(UserRole.Administrator))]
         public async Task<IActionResult> GetPersonsExcel(int leaderId)
         {
             try
@@ -40,7 +52,13 @@ namespace DEP.Controllers
             }
         }
         
-        [HttpGet("personexcel/{id:int}"), Authorize]
+        [HttpGet("personexcel/{id:int}"), Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Uddannelseschef) + "," +
+    nameof(UserRole.Uddannelsesleder) + "," +
+    nameof(UserRole.Human_Resources) + "," +
+    nameof(UserRole.Administrator))]
         public async Task<IActionResult> GetPersonExcel(int id)
         {
             try
@@ -53,20 +71,31 @@ namespace DEP.Controllers
             }
         }
 
-        [HttpGet("courseId/{courseId:int}"), Authorize]
+        [HttpGet("courseId/{courseId:int}"), Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Uddannelseschef) + "," +
+    nameof(UserRole.Uddannelsesleder) + "," +
+    nameof(UserRole.Human_Resources) + "," +
+    nameof(UserRole.Administrator))]
         public async Task<IActionResult> GetPersonsByCourseId(int courseId)
         {
             return Ok(await service.GetPersonsByCourseId(courseId));
         }
 
-        [HttpGet("notincourse/{courseId:int}"), Authorize]
-        public async Task<IActionResult> GetPersonsNotInCourse(int courseId)
-        {
-            return Ok(await service.GetPersonsNotInCourse(courseId));
-        }
+        //[HttpGet("notincourse/{courseId:int}"), Authorize]
+        //public async Task<IActionResult> GetPersonsNotInCourse(int courseId)
+        //{
+        //    return Ok(await service.GetPersonsNotInCourse(courseId));
+        //}
 
 
-        [HttpGet("{personId:int}")]
+        [HttpGet("{personId:int}"), Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Uddannelseschef) + "," +
+    nameof(UserRole.Uddannelsesleder) + "," +
+    nameof(UserRole.Administrator))]
         public async Task<IActionResult> GetPersonById(int personId)
         {
             var person = await service.GetPersonById(personId);
@@ -77,13 +106,17 @@ namespace DEP.Controllers
             return Ok(person);
         }
 
-        [HttpGet("departmentId/{departmentId}/locationId{locationId}"), Authorize]
-        public async Task<IActionResult> GetPersonsFromLocationAndDepartment(int departmentId, int locationId)
-        {
-            return Ok(await service.GetPersonsByDepartmentAndLocation(departmentId, locationId));
-        }
+        //[HttpGet("departmentId/{departmentId}/locationId{locationId}"), Authorize]
+        //public async Task<IActionResult> GetPersonsFromLocationAndDepartment(int departmentId, int locationId)
+        //{
+        //    return Ok(await service.GetPersonsByDepartmentAndLocation(departmentId, locationId));
+        //}
 
-        [HttpPost, Authorize]
+        [HttpPost, Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Controller) + "," +
+    nameof(UserRole.Administrator))]
         public async Task<IActionResult> AddPerson(Person person)
         {
             try
@@ -112,7 +145,11 @@ namespace DEP.Controllers
             }
         }
 
-        [HttpPut, Authorize]
+        [HttpPut, Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Controller) + "," +
+    nameof(UserRole.Administrator))]
         public async Task<IActionResult> UpdatePerson(Person person)
         {
             try
@@ -125,7 +162,11 @@ namespace DEP.Controllers
             }
         }
 
-        [HttpDelete("{id:int}"), Authorize]
+        [HttpDelete("{id:int}"), Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Controller) + "," +
+    nameof(UserRole.Administrator))]
         public async Task<IActionResult> DeletePerson(int id)
         {
             try
