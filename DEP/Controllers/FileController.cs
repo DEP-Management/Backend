@@ -20,7 +20,13 @@ namespace DEP.Controllers
         public FileController(IFileService service, DatabaseContext context, IConfiguration configuration)
         { this.service = service; this.context = context; this.configuration = configuration; }
 
-        [HttpGet("role/{roleId:int}"), Authorize]
+        [HttpGet("role/{roleId:int}"), Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Uddannelseschef) + "," +
+    nameof(UserRole.Uddannelsesleder) + "," +
+    nameof(UserRole.Human_Resources) + "," +
+    nameof(UserRole.Administrator))]
         public async Task<IActionResult> GetFiles(int roleId)
         {
             try
@@ -33,45 +39,51 @@ namespace DEP.Controllers
             }
         }
 
-        [HttpGet("{id:int}"), Authorize]
-        public async Task<IActionResult> GetFileById(int id)
-        {
-            try
-            {
-                var file = await service.GetFileById(id);
-                if (file == null)
-                {
-                    return NotFound("Awww Dang it!");
-                }
-                return Ok(file);
-            }
-            catch (Exception e)
-            {
+        //[HttpGet("{id:int}"), Authorize]
+        //public async Task<IActionResult> GetFileById(int id)
+        //{
+        //    try
+        //    {
+        //        var file = await service.GetFileById(id);
+        //        if (file == null)
+        //        {
+        //            return NotFound("Awww Dang it!");
+        //        }
+        //        return Ok(file);
+        //    }
+        //    catch (Exception e)
+        //    {
 
-                return BadRequest(e.Message);
-            }
-        }
+        //        return BadRequest(e.Message);
+        //    }
+        //}
 
-        [HttpGet("{name}"), Authorize]
-        public async Task<IActionResult> GetFileByName(string name)
-        {
-            try
-            {
-                var file = await service.GetFileByName(name);
-                if (file == null)
-                {
-                    return NotFound("Better luck next time!");
-                }
-                return Ok(file);
-            }
-            catch (Exception e)
-            {
+        //[HttpGet("{name}"), Authorize]
+        //public async Task<IActionResult> GetFileByName(string name)
+        //{
+        //    try
+        //    {
+        //        var file = await service.GetFileByName(name);
+        //        if (file == null)
+        //        {
+        //            return NotFound("Better luck next time!");
+        //        }
+        //        return Ok(file);
+        //    }
+        //    catch (Exception e)
+        //    {
 
-                return BadRequest(e.Message);
-            }
-        }
+        //        return BadRequest(e.Message);
+        //    }
+        //}
 
-        [HttpGet("DownloadFile/{id:int}")]
+        [HttpGet("DownloadFile/{id:int}"), Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Uddannelseschef) + "," +
+    nameof(UserRole.Uddannelsesleder) + "," +
+    nameof(UserRole.Human_Resources) + "," +
+    nameof(UserRole.Administrator))]
         public async Task<IActionResult> DownloadFile(int id)
         {
             var file = context.Files.Where(f => f.FileId == id).FirstOrDefault();
@@ -110,25 +122,31 @@ namespace DEP.Controllers
             return contentType;
         }
 
-        [HttpPost("{userId:int}/{tagId:int}")]
-        public async Task<IActionResult> AddFile(IFormFile file, int userId, int tagId)
-        {
-            try
-            {
-                if (file == null)
-                {
-                    return NotFound("File not Given? Be better than that!");
-                }
-                return Created("File", await service.AddFile(file, userId, tagId));
-            }
-            catch (Exception e)
-            {
+        //[HttpPost("{userId:int}/{tagId:int}")]
+        //public async Task<IActionResult> AddFile(IFormFile file, int userId, int tagId)
+        //{
+        //    try
+        //    {
+        //        if (file == null)
+        //        {
+        //            return NotFound("File not Given? Be better than that!");
+        //        }
+        //        return Created("File", await service.AddFile(file, userId, tagId));
+        //    }
+        //    catch (Exception e)
+        //    {
 
-                return BadRequest(e.Message);
-            }
-        }
+        //        return BadRequest(e.Message);
+        //    }
+        //}
 
-        [HttpPost("multiple")]
+        [HttpPost("multiple"), Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Uddannelseschef) + "," +
+    nameof(UserRole.Uddannelsesleder) + "," +
+    nameof(UserRole.Human_Resources) + "," +
+    nameof(UserRole.Administrator))]
         public async Task<IActionResult> AddMultipleFiles([FromForm] List<IFormFile> files, [FromForm] string fileTags, [FromForm] int personId)
         {
             try
@@ -169,7 +187,13 @@ namespace DEP.Controllers
             }
         } */
 
-        [HttpDelete("{id:int}"), Authorize]
+        [HttpDelete("{id:int}"), Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Uddannelseschef) + "," +
+    nameof(UserRole.Uddannelsesleder) + "," +
+    nameof(UserRole.Human_Resources) + "," +
+    nameof(UserRole.Administrator))]
         public async Task<IActionResult> Deletefile(int id)
         {
             try

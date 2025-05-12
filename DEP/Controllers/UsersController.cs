@@ -27,37 +27,71 @@ namespace DEP.Controllers
             //return Ok(await service.GetUsers());
         }
 
-        [HttpGet("educationBosses")]
+        [HttpGet("educationBosses"), Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Uddannelseschef) + "," +
+    nameof(UserRole.Uddannelsesleder) + "," +
+    nameof(UserRole.Human_Resources) + "," +
+    nameof(UserRole.Administrator))]
         public async Task<IActionResult> GetEducationBosses()
         {
             return Ok(await service.GetEducationBosses());
         }
 
-        [HttpGet("educationBossesExcel")]
+        [HttpGet("educationBossesExcel"), Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Uddannelseschef) + "," +
+    nameof(UserRole.Uddannelsesleder) + "," +
+    nameof(UserRole.Human_Resources) + "," +
+    nameof(UserRole.Administrator))]
         public async Task<IActionResult> GetEducationBossesExcel()
         {
             return Ok(await service.GetEducationBossesExcel());
         }
         
-        [HttpGet("selctedEducationBossExcel/{id:int}")]
+        [HttpGet("selctedEducationBossExcel/{id:int}"), Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Uddannelseschef) + "," +
+    nameof(UserRole.Uddannelsesleder) + "," +
+    nameof(UserRole.Human_Resources) + "," +
+    nameof(UserRole.Administrator))]
         public async Task<IActionResult> GetSelctedEducationBossExcel(int id)
         {
             return Ok(await service.GetSelctedEducationBossExcel(id));
         }
 
-        [HttpGet("educationLeaderExcel/{id:int}")]
+        [HttpGet("educationLeaderExcel/{id:int}"), Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Uddannelseschef) + "," +
+    nameof(UserRole.Uddannelsesleder) + "," +
+    nameof(UserRole.Human_Resources) + "," +
+    nameof(UserRole.Administrator))]
         public async Task<IActionResult> GetEducationLeaderExcel(int id)
         {
             return Ok(await service.GetSelectedEducationLeaderExcel(id));
         }
 
-        [HttpGet("educationboss/{id:int}"), Authorize]
+        [HttpGet("educationboss/{id:int}"), Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Uddannelseschef) + "," +
+    nameof(UserRole.Uddannelsesleder) + "," +
+    nameof(UserRole.Human_Resources) + "," +
+    nameof(UserRole.Administrator))]
         public async Task<IActionResult> GetUsersByEducationBossId(int id)
         {
             return Ok(await service.GetUsersByEducationBossId(id));
         }
 
-        [HttpGet("userrole"), Authorize]
+        [HttpGet("userrole"), Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Controller) + "," +
+    nameof(UserRole.Administrator))]
         public async Task<IActionResult> GetUsersByUserRole([FromQuery] UserRole userRole)
         {
             return Ok(await service.GetUsersByUserRole(userRole));
@@ -107,20 +141,20 @@ namespace DEP.Controllers
             });
         }
 
-        [HttpGet("{name}"), Authorize]
-        public async Task<IActionResult> GetUserByName(string name)
-        {
-            var user = await service.GetUserByName(name);
+        //[HttpGet("{name}"), Authorize]
+        //public async Task<IActionResult> GetUserByName(string name)
+        //{
+        //    var user = await service.GetUserByName(name);
 
-            if (user == null)
-            {
-                return NotFound($"Unable to find user with username: {name}");
-            }
+        //    if (user == null)
+        //    {
+        //        return NotFound($"Unable to find user with username: {name}");
+        //    }
 
-            return Ok(user);
-        }
+        //    return Ok(user);
+        //}
 
-        [HttpPost]
+        [HttpPost, Authorize(Roles = nameof(UserRole.Administrator))]
         public async Task<IActionResult> AddUser(AddUserViewModel viewModel)
         {
             var user = await service.GetUserByUsername(viewModel.Username);
@@ -157,13 +191,13 @@ namespace DEP.Controllers
         }
 
 
-        [HttpPost("reassign-user")]
+        [HttpPost("reassign-user"), Authorize(Roles = nameof(UserRole.Administrator))]
         public async Task<IActionResult> ReassignUser([FromBody] ReassignUserViewModel model)
         {
             return Ok(await service.ReassignUser(model));
         }
 
-        [HttpDelete("{id:int}")/*, Authorize(Roles = "Administrator")*/]
+        [HttpDelete("{id:int}"), Authorize(Roles = nameof(UserRole.Administrator))]
         public async Task<IActionResult> DeleteUser(int id)
         {
             var userDeleted = await service.DeleteUser(id);
@@ -176,7 +210,7 @@ namespace DEP.Controllers
             return Ok(userDeleted);
         }
 
-        [HttpPut, Authorize]
+        [HttpPut, Authorize(Roles = nameof(UserRole.Administrator))]
         public async Task<IActionResult> UpdateUser(UserViewModel viewModel)
         {
             return Ok(await service.UpdateUserFromViewModel(viewModel));

@@ -21,46 +21,50 @@ namespace DEP.Controllers
             return Ok(await service.GetFileTags());
         }
 
-        [HttpGet("{id:int}"), Authorize]
-        public async Task<IActionResult> GetFileTagById(int id)
-        {
-            try
-            {
-                var file = await service.GetFileTagById(id);
-                if (file == null)
-                {
-                    return NotFound();
-                }
-                return Ok(file);
+        //[HttpGet("{id:int}"), Authorize]
+        //public async Task<IActionResult> GetFileTagById(int id)
+        //{
+        //    try
+        //    {
+        //        var file = await service.GetFileTagById(id);
+        //        if (file == null)
+        //        {
+        //            return NotFound();
+        //        }
+        //        return Ok(file);
 
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        return BadRequest(e.Message);
+        //    }
+        //}
 
-        [HttpGet("{name}"), Authorize]
-        public async Task<IActionResult> GetFileTagByName(string name)
-        {
-            try
-            {
-                var file = await service.GetFileTagByName(name);
-                if (file == null)
-                {
-                    return NotFound();
-                }
-                return Ok(file);
+        //[HttpGet("{name}"), Authorize]
+        //public async Task<IActionResult> GetFileTagByName(string name)
+        //{
+        //    try
+        //    {
+        //        var file = await service.GetFileTagByName(name);
+        //        if (file == null)
+        //        {
+        //            return NotFound();
+        //        }
+        //        return Ok(file);
 
-            }
-            catch (Exception e)
-            {
+        //    }
+        //    catch (Exception e)
+        //    {
 
-                return BadRequest(e.Message);
-            }
-        }
+        //        return BadRequest(e.Message);
+        //    }
+        //}
 
-        [HttpPost, Authorize]
+        [HttpPost, Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Controller) + "," +
+    nameof(UserRole.Administrator))]
         public async Task<IActionResult> AddFileTag(FileTagViewModel fileTag)
         {
             try
@@ -73,7 +77,11 @@ namespace DEP.Controllers
             }
         }
 
-        [HttpPut, Authorize]
+        [HttpPut, Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Controller) + "," +
+    nameof(UserRole.Administrator))]
         public async Task<IActionResult> UpdateFileTag(FileTagViewModel fileTag)
         {
             try
@@ -90,7 +98,11 @@ namespace DEP.Controllers
             }
         }
 
-        [HttpDelete("{id:int}"), Authorize]
+        [HttpDelete("{id:int}"), Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Controller) + "," +
+    nameof(UserRole.Administrator))]
         public async Task<IActionResult> DeleteFileTag(int id)
         {
             try

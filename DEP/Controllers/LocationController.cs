@@ -24,7 +24,11 @@ namespace DEP.Controllers
             return Ok(await service.GetLocationById(id));
         }
 
-        [HttpDelete("{id:int}"), Authorize]
+        [HttpDelete("{id:int}"), Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Controller) + "," +
+    nameof(UserRole.Administrator))]
         public async Task<IActionResult> DeleteLocation(int id)
         {
             var success = await service.DeleteLocation(id);
@@ -37,13 +41,21 @@ namespace DEP.Controllers
             return Ok(true);
         }
 
-        [HttpPut, Authorize]
+        [HttpPut, Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Controller) + "," +
+    nameof(UserRole.Administrator))]
         public async Task<IActionResult> UpdateLocation(Location location)
         {
             return Ok(await service.UpdateLocation(location));
         }
 
-        [HttpPost, Authorize]
+        [HttpPost, Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Controller) + "," +
+    nameof(UserRole.Administrator))]
         public async Task<IActionResult> AddLocation(Location location)
         {
             return Ok(await service.AddLocation(location));
