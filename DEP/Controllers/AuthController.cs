@@ -73,7 +73,7 @@ namespace DEP.Controllers
         }
 
 
-        [HttpPut("resetpassword/{userId:int}"), Authorize]
+        [HttpPut("resetpassword/{userId:int}"), Authorize(Roles = nameof(UserRole.Administrator))]
         public async Task<IActionResult> ResetPassword(int userId)
         {
             var success = await authService.ResetPassword(userId);

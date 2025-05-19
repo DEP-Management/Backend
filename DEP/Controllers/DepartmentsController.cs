@@ -21,7 +21,11 @@ namespace DEP.Controllers
             return Ok(await depService.GetDepartments());
         }
 
-        [HttpPost, Authorize]
+        [HttpPost, Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Controller) + "," +
+    nameof(UserRole.Administrator))]
         public async Task<IActionResult> AddDepartment(Department department)
         {
             var dep = await depService.AddDepartment(department);
@@ -29,13 +33,21 @@ namespace DEP.Controllers
             return Ok(dep);
         }
 
-        [HttpPut, Authorize]
+        [HttpPut, Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Controller) + "," +
+    nameof(UserRole.Administrator))]
         public async Task<IActionResult> UpdateDepartment(Department department)
         {
             return Ok(await depService.UpdateDepartment(department));
         }
 
-        [HttpDelete("{id:int}"), Authorize]
+        [HttpDelete("{id:int}"), Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Controller) + "," +
+    nameof(UserRole.Administrator))]
         public async Task<IActionResult> DeleteDepartment(int id)
         {
             var success = await depService.DeleteDepartment(id);
