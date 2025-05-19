@@ -1,5 +1,6 @@
 ﻿using DEP.Repository.Interfaces;
 using DEP.Repository.Models;
+using DEP.Service.Interfaces;
 using DEP.Service.Services;
 using Microsoft.AspNetCore.Http;
 using Moq;
@@ -10,11 +11,12 @@ namespace DEP.Test.Services
     public class FileServiceTests
     {
         private readonly Mock<IFileRepository> _repoMock = new();
+        private readonly Mock<IEncryptionService> _encryptionMock = new();
         private readonly FileService _service;
 
         public FileServiceTests()
         {
-            _service = new FileService(_repoMock.Object);
+            _service = new FileService(_repoMock.Object, _encryptionMock.Object);
         }
 
         public async Task AddFile_ShouldUploadAndReturnFile()

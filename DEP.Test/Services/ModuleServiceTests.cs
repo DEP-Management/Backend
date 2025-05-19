@@ -1,5 +1,6 @@
 ﻿using DEP.Repository.Interfaces;
 using DEP.Repository.Models;
+using DEP.Service.Interfaces;
 using DEP.Service.Services;
 using Moq;
 using System;
@@ -14,12 +15,13 @@ namespace DEP.Test.Services
     {
         private readonly Mock<IModuleRepository> mockModuleRepo = new();
         private readonly Mock<ICourseRepository> mockCourseRepo = new();
+        private readonly Mock<IEncryptionService> _encryptionMock = new();
 
         private readonly ModuleService service;
 
         public ModuleServiceTests()
         {
-            service = new ModuleService(mockModuleRepo.Object, mockCourseRepo.Object);
+            service = new ModuleService(mockModuleRepo.Object, mockCourseRepo.Object, _encryptionMock.Object);
         }
 
         [Fact]
