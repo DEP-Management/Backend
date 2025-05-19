@@ -1,5 +1,6 @@
 ﻿using DEP.Repository.Interfaces;
 using DEP.Repository.Models;
+using DEP.Service.EncryptionHelpers;
 using DEP.Service.Interfaces;
 using DEP.Service.ViewModels;
 
@@ -9,7 +10,12 @@ namespace DEP.Service.Services
     {
         private readonly IModuleRepository repo;
         private readonly ICourseRepository courseRepo;
-        public ModuleService(IModuleRepository repo, ICourseRepository courseRepo) { this.repo = repo; this.courseRepo = courseRepo; }
+        private readonly IEncryptionService encryptionService;
+        public ModuleService(IModuleRepository repo, ICourseRepository courseRepo, IEncryptionService encryptionService)
+        {
+            this.repo = repo; this.courseRepo = courseRepo;
+            this.encryptionService = encryptionService;
+        }
 
         public async Task<bool> AddModule(Module module)
         {
@@ -45,6 +51,8 @@ namespace DEP.Service.Services
                 modules.Add(excelModules);
             }
 
+            PersonEncryptionHelper.DecryptCoursesWithPersons(modules, encryptionService);
+
             return modules;
         }
 
@@ -63,6 +71,8 @@ namespace DEP.Service.Services
                 Courses = courses,
             };
             modules.Add(excelModules);
+
+            PersonEncryptionHelper.DecryptCoursesWithPersons(modules, encryptionService);
 
             return modules;
         }

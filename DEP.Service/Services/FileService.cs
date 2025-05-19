@@ -1,5 +1,6 @@
 ﻿using DEP.Repository.Interfaces;
 using DEP.Repository.Models;
+using DEP.Service.EncryptionHelpers;
 using DEP.Service.Interfaces;
 using DEP.Service.ViewModels;
 using Microsoft.AspNetCore.Http;
@@ -10,7 +11,12 @@ namespace DEP.Service.Services
     public class FileService : IFileService
     {
         private readonly IFileRepository repo;
-        public FileService(IFileRepository repo) { this.repo = repo; }
+        private readonly IEncryptionService encryptionService;
+        public FileService(IFileRepository repo, IEncryptionService encryptionService)
+        {
+            this.repo = repo;
+            this.encryptionService = encryptionService;
+        }
         public async Task<File> AddFile(IFormFile file, int personId, int tagId)
         {
             File newfile = await repo.UploadFile(file);
@@ -34,7 +40,11 @@ namespace DEP.Service.Services
 
         public async Task<List<File>> GetFiles(int roleId)
         {
-            return await repo.GetFiles(roleId);
+            var files = await repo.GetFiles(roleId);
+
+            FileEncryptionHelper.Decrypt(files, encryptionService);
+
+            return files;
         }
 
         public async Task<File> GetFileById(int id)

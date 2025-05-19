@@ -1,5 +1,7 @@
-﻿using DEP.Repository.Models;
+﻿using System;
+using DEP.Repository.Models;
 using DEP.Service.Interfaces;
+using DEP.Service.ViewModels;
 
 namespace DEP.Service.EncryptionHelpers
 {
@@ -17,8 +19,9 @@ namespace DEP.Service.EncryptionHelpers
             var decryptedDepartments = new HashSet<Department>();
             var decryptedLocations = new HashSet<Location>();
             var decryptedUsers = new HashSet<User>();
+            var decryptedPersons = new HashSet<Person>();
 
-            Decrypt(person, encryptionService, decryptedDepartments, decryptedLocations, decryptedUsers);
+            Decrypt(person, encryptionService, decryptedDepartments, decryptedLocations, decryptedUsers, decryptedPersons);
         }
 
         // For lists
@@ -27,11 +30,78 @@ namespace DEP.Service.EncryptionHelpers
             var decryptedDepartments = new HashSet<Department>();
             var decryptedLocations = new HashSet<Location>();
             var decryptedUsers = new HashSet<User>();
+            var decryptedPersons = new HashSet<Person>();
 
             foreach (var person in people)
             {
-                Decrypt(person, encryptionService, decryptedDepartments, decryptedLocations, decryptedUsers);
+                Decrypt(person, encryptionService, decryptedDepartments, decryptedLocations, decryptedUsers, decryptedPersons);
             }
+        }
+
+        // For list of courses with persons
+        public static void DecryptCoursesWithPersons(List<ModuleWithCourseViewModel> modules, IEncryptionService encryptionService)
+        {
+            var decryptedDepartments = new HashSet<Department>();
+            var decryptedLocations = new HashSet<Location>();
+            var decryptedUsers = new HashSet<User>();
+            var decryptedPersons = new HashSet<Person>();
+
+
+            foreach (var module in modules)
+            {
+                foreach (var course in module.Courses)
+                {
+                    foreach (var pc in course.PersonCourses)
+                    {
+                        if (pc.Person != null && !decryptedPersons.Contains(pc.Person))
+                        {
+                            if (pc.Person.Name != null)
+                                pc.Person.Name = encryptionService.Decrypt(pc.Person.Name);
+
+                            if (pc.Person.Initials != null)
+                                pc.Person.Initials = encryptionService.Decrypt(pc.Person.Initials);
+
+                            decryptedPersons.Add(pc.Person);
+                        }
+
+                        if (pc.Person.Department != null && !decryptedDepartments.Contains(pc.Person.Department))
+                        {
+                            DepartmentEncryptionHelper.Decrypt(pc.Person.Department, encryptionService);
+                            decryptedDepartments.Add(pc.Person.Department);
+                        }
+
+                        if (pc.Person.Location != null && !decryptedLocations.Contains(pc.Person.Location))
+                        {
+                            LocationEncryptionHelper.Decrypt(pc.Person.Location, encryptionService);
+                            decryptedLocations.Add(pc.Person.Location);
+                        }
+
+                        if (pc.Person.OperationCoordinator != null && !decryptedUsers.Contains(pc.Person.OperationCoordinator))
+                        {
+                            UserEncryptionHelper.DecryptUpdatableFields(pc.Person.OperationCoordinator, encryptionService);
+                            decryptedUsers.Add(pc.Person.OperationCoordinator);
+                        }
+
+                        if (pc.Person.EducationalConsultant != null && !decryptedUsers.Contains(pc.Person.EducationalConsultant))
+                        {
+                            UserEncryptionHelper.DecryptUpdatableFields(pc.Person.EducationalConsultant, encryptionService);
+                            decryptedUsers.Add(pc.Person.EducationalConsultant);
+                        }
+
+                        if (pc.Person.EducationalLeader != null && !decryptedUsers.Contains(pc.Person.EducationalLeader))
+                        {
+                            UserEncryptionHelper.DecryptUpdatableFields(pc.Person.EducationalLeader, encryptionService);
+                            decryptedUsers.Add(pc.Person.EducationalLeader);
+                        }
+                        //if (pc.Person is not null)
+                        //{
+                        //    //Decrypt(pc.Person, encryptionService, decryptedDepartments, decryptedLocations, decryptedUsers, decryptedPersons);
+                        //}
+                    }
+                }
+            }
+
+
         }
 
         // Internal shared decrypt method
@@ -40,10 +110,19 @@ namespace DEP.Service.EncryptionHelpers
             IEncryptionService encryptionService,
             HashSet<Department> decryptedDepartments,
             HashSet<Location> decryptedLocations,
-            HashSet<User> decryptedUsers)
+            HashSet<User> decryptedUsers,
+            HashSet<Person> decryptedPersons)
         {
-            person.Name = encryptionService.Decrypt(person.Name);
-            person.Initials = encryptionService.Decrypt(person.Initials);
+            if (person != null && !decryptedPersons.Contains(person))
+            {
+                if (person.Name != null)
+                    person.Name = encryptionService.Decrypt(person.Name);
+
+                if (person.Initials != null)
+                    person.Initials = encryptionService.Decrypt(person.Initials);
+
+                decryptedPersons.Add(person);
+            }
 
             if (person.Department != null && !decryptedDepartments.Contains(person.Department))
             {
