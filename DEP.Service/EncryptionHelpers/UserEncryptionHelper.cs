@@ -41,7 +41,6 @@ namespace DEP.Service.EncryptionHelpers
                 Decrypt(user, encryptionService, decryptedDepartments, decryptedLocations, decryptedUsers);
             }
         }
-
         public static void DecryptUpdatableFields(User user, IEncryptionService encryptionService)
         {
             if (!string.IsNullOrEmpty(user.Name))
@@ -79,6 +78,46 @@ namespace DEP.Service.EncryptionHelpers
             {
                 LocationEncryptionHelper.Decrypt(user.Location, encryptionService);
                 decryptedLocations.Add(user.Location);
+            }
+        }
+
+        public static void EncryptNames(List<User> users, IEncryptionService encryptionService)
+        {
+            foreach (var user in users)
+            {
+
+                if (user == null) return;
+
+                // Check and decrypt fields only if they haven't been decrypted already
+                if (!string.IsNullOrEmpty(user.UserName))
+                {
+                    user.UserName = encryptionService.Encrypt(user.UserName);
+                }
+
+                if (!string.IsNullOrEmpty(user.Name))
+                {
+                    user.Name = encryptionService.Encrypt(user.Name);
+                }
+            }
+        }
+
+        public static void DecryptNames(List<User> users, IEncryptionService encryptionService)
+        {
+            foreach (var user in users)
+            {
+
+                if (user == null) return;
+
+                // Check and decrypt fields only if they haven't been decrypted already
+                if (!string.IsNullOrEmpty(user.UserName))
+                {
+                    user.UserName = encryptionService.Decrypt(user.UserName);
+                }
+
+                if (!string.IsNullOrEmpty(user.Name))
+                {
+                    user.Name = encryptionService.Decrypt(user.Name);
+                }
             }
         }
 
