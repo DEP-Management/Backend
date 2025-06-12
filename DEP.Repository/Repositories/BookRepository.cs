@@ -46,18 +46,44 @@ namespace DEP.Repository.Repositories
         public async Task<Book> GetBook(int id)
         {
             var book = await context.Books
-                .Include(b => b.Module)
-                .FirstOrDefaultAsync(b => b.BookId == id);
+                .Where(b => b.BookId == id)
+                .Select(b => new Book
+                {
+                    BookId = b.BookId,
+                    Name = b.Name,
+                    Amount = b.Amount,
+                    ModuleId = b.ModuleId,
+                    Module = b.Module == null ? null : new Module
+                    {
+                        ModuleId = b.Module.ModuleId,
+                        Name = b.Module.Name
+                    }
+                })
+                .FirstOrDefaultAsync();
+
             return book;
         }
 
         public async Task<List<Book>> GetBooks()
         {
             var books = await context.Books
-                .Include(b => b.Module)
+                .Select(b => new Book
+                {
+                    BookId = b.BookId,
+                    Name = b.Name,
+                    Amount = b.Amount,
+                    ModuleId = b.ModuleId,
+                    Module = b.Module == null ? null : new Module
+                    {
+                        ModuleId = b.Module.ModuleId,
+                        Name = b.Module.Name
+                    }
+                })
                 .ToListAsync();
+
             return books;
         }
+
 
         public async Task<bool> UpdateBook(Book book)
         {

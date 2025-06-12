@@ -107,22 +107,142 @@ namespace DEP.Repository.Repositories
 
         public async Task<List<File>> GetFiles(int roleId)
         {
-            var files = await context.Files.Include(x => x.FileTag).ThenInclude(ft => ft.FileTagUserRoles).Include(x => x.Person).ToListAsync();
-
+            var files = await context.Files
+                .Select(f => new File
+                {
+                    FileId = f.FileId,
+                    FileName = f.FileName,
+                    FilePath = f.FilePath,
+                    FileFormat = f.FileFormat,
+                    ContentType = f.ContentType,
+                    FileTagId = f.FileTagId,
+                    PersonId = f.PersonId,
+                    UploadDate = f.UploadDate,
+                    FileTag = f.FileTag == null ? null : new FileTag
+                    {
+                        FileTagId = f.FileTag.FileTagId,
+                        TagName = f.FileTag.TagName,
+                        FileTagUserRoles = f.FileTag.FileTagUserRoles
+                            .Select(ur => new FileTagUserRole
+                            {
+                                FileTagId = ur.FileTagId,
+                                Role = ur.Role
+                            })
+                            .ToList()
+                    },
+                    Person = f.Person == null ? null : new Person
+                    {
+                        PersonId = f.Person.PersonId,
+                        Name = f.Person.Name,
+                        Initials = f.Person.Initials,
+                        DepartmentId = f.Person.DepartmentId,
+                        LocationId = f.Person.LocationId,
+                        EducationalConsultantId = f.Person.EducationalConsultantId,
+                        EducationalLeaderId = f.Person.EducationalLeaderId,
+                        OperationCoordinatorId = f.Person.OperationCoordinatorId,
+                        HiringDate = f.Person.HiringDate,
+                        EndDate = f.Person.EndDate,
+                        SvuEligible = f.Person.SvuEligible,
+                        SvuApplied = f.Person.SvuApplied
+                    }
+                })
+                .ToListAsync();
             return files;
         }
 
         public async Task<File> GetFileById(int id)
         {
-            var file = await context.Files.Include(x => x.FileTag).ThenInclude(ft => ft.FileTagUserRoles).Include(x => x.Person).FirstOrDefaultAsync(x => x.FileId == id);
+            var file = await context.Files
+                .Where(f => f.FileId == id)
+                .Select(f => new File
+                {
+                    FileId = f.FileId,
+                    FileName = f.FileName,
+                    FilePath = f.FilePath,
+                    FileFormat = f.FileFormat,
+                    ContentType = f.ContentType,
+                    FileTagId = f.FileTagId,
+                    PersonId = f.PersonId,
+                    UploadDate = f.UploadDate,
+                    FileTag = f.FileTag == null ? null : new FileTag
+                    {
+                        FileTagId = f.FileTag.FileTagId,
+                        TagName = f.FileTag.TagName,
+                        FileTagUserRoles = f.FileTag.FileTagUserRoles
+                            .Select(ur => new FileTagUserRole
+                            {
+                                FileTagId = ur.FileTagId,
+                                Role = ur.Role
+                            })
+                            .ToList()
+                    },
+                    Person = f.Person == null ? null : new Person
+                    {
+                        PersonId = f.Person.PersonId,
+                        Name = f.Person.Name,
+                        Initials = f.Person.Initials,
+                        DepartmentId = f.Person.DepartmentId,
+                        LocationId = f.Person.LocationId,
+                        EducationalConsultantId = f.Person.EducationalConsultantId,
+                        EducationalLeaderId = f.Person.EducationalLeaderId,
+                        OperationCoordinatorId = f.Person.OperationCoordinatorId,
+                        HiringDate = f.Person.HiringDate,
+                        EndDate = f.Person.EndDate,
+                        SvuEligible = f.Person.SvuEligible,
+                        SvuApplied = f.Person.SvuApplied
+                    }
+                })
+                .FirstOrDefaultAsync();
+
             return file;
         }
 
         public async Task<List<File>> GetFileByName(string name)
         {
-            var file = await context.Files.Include(x => x.FileTag).ThenInclude(ft => ft.FileTagUserRoles).Include(x => x.Person).Where(x => x.FileName.Contains(name.ToLower())).ToListAsync();
-            return file;
+            return await context.Files
+                .Where(f => f.FileName.ToLower().Contains(name.ToLower()))
+                .Select(f => new File
+                {
+                    FileId = f.FileId,
+                    FileName = f.FileName,
+                    FilePath = f.FilePath,
+                    FileFormat = f.FileFormat,
+                    ContentType = f.ContentType,
+                    FileTagId = f.FileTagId,
+                    PersonId = f.PersonId,
+                    UploadDate = f.UploadDate,
+                    FileTag = f.FileTag == null ? null : new FileTag
+                    {
+                        FileTagId = f.FileTag.FileTagId,
+                        TagName = f.FileTag.TagName,
+                        FileTagUserRoles = f.FileTag.FileTagUserRoles
+                            .Select(ur => new FileTagUserRole
+                            {
+                                FileTagId = ur.FileTagId,
+                                Role = ur.Role
+                            })
+                            .ToList()
+                    },
+                    Person = f.Person == null ? null : new Person
+                    {
+                        PersonId = f.Person.PersonId,
+                        Name = f.Person.Name,
+                        Initials = f.Person.Initials,
+                        DepartmentId = f.Person.DepartmentId,
+                        LocationId = f.Person.LocationId,
+                        EducationalConsultantId = f.Person.EducationalConsultantId,
+                        EducationalLeaderId = f.Person.EducationalLeaderId,
+                        OperationCoordinatorId = f.Person.OperationCoordinatorId,
+                        HiringDate = f.Person.HiringDate,
+                        EndDate = f.Person.EndDate,
+                        SvuEligible = f.Person.SvuEligible,
+                        SvuApplied = f.Person.SvuApplied
+                    }
+                })
+                .ToListAsync();
         }
+
+
 
         public async Task<File> AddFile(File file)
         {
@@ -132,7 +252,33 @@ namespace DEP.Repository.Repositories
             {
                 await context.SaveChangesAsync();
                 // Getting the full file from DB so FileTag object is included
-                tt = await context.Files.Include(x => x.FileTag).ThenInclude(ft => ft.FileTagUserRoles).FirstOrDefaultAsync(x => x.FileId == file.FileId);
+                tt = await context.Files
+                .Where(f => f.FileId == file.FileId)
+                .Select(f => new File
+                {
+                    FileId = f.FileId,
+                    FileName = f.FileName,
+                    FilePath = f.FilePath,
+                    FileFormat = f.FileFormat,
+                    ContentType = f.ContentType,
+                    FileTagId = f.FileTagId,
+                    PersonId = f.PersonId,
+                    UploadDate = f.UploadDate,
+                    FileTag = f.FileTag== null ? null : new FileTag
+                    {
+                        FileTagId = f.FileTag.FileTagId,
+                        TagName = f.FileTag.TagName,
+                        FileTagUserRoles = f.FileTag.FileTagUserRoles
+                            .Select(ur => new FileTagUserRole
+                            {
+                                FileTagId = ur.FileTagId,
+                                Role = ur.Role
+                            })
+                            .ToList()
+                    }
+                })
+                .FirstOrDefaultAsync();
+
             }
             catch (Exception ex)
             {

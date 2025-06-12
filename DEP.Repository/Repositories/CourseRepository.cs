@@ -104,8 +104,28 @@ namespace DEP.Repository.Repositories
 
         public async Task<List<Course>> GetCoursesByModuleId(int moduleId)
         {
-            return await context.Courses.Where(x => x.ModuleId == moduleId).Include(x => x.PersonCourses).OrderBy(x => x.StartDate).OrderBy(x => x.EndDate).ToListAsync();
+            return await context.Courses
+                .Where(c => c.ModuleId == moduleId)
+                .OrderBy(c => c.StartDate)
+                .ThenBy(c => c.EndDate)
+                .Select(c => new Course
+                {
+                    CourseId = c.CourseId,
+                    CourseNumber = c.CourseNumber,
+                    StartDate = c.StartDate,
+                    EndDate = c.EndDate,
+                    CourseType = c.CourseType,
+                    ModuleId = c.ModuleId,
+                    PersonCourses = c.PersonCourses.Select(pc => new PersonCourse
+                    {
+                        PersonId = pc.PersonId,
+                        CourseId = pc.CourseId,
+                        Status = pc.Status
+                    }).ToList()
+                }).OrderBy(x => x.StartDate).ThenBy(x => x.EndDate).ToListAsync();
         }
+
+
 
         public async Task<Course> GetCourseByIdSimple(int id)
         {
@@ -116,7 +136,28 @@ namespace DEP.Repository.Repositories
         {
 
             var courses = new List<Course>();
-            courses = await context.Courses.Where(x => x.ModuleId == moduleId).Include(x => x.PersonCourses).OrderBy(x => x.StartDate).OrderBy(x => x.EndDate).ToListAsync();
+            courses = await context.Courses
+                .Where(c => c.ModuleId == moduleId)
+                .OrderBy(c => c.StartDate)
+                .ThenBy(c => c.EndDate)
+                .Select(c => new Course
+                {
+                    CourseId = c.CourseId,
+                    CourseNumber = c.CourseNumber,
+                    StartDate = c.StartDate,
+                    EndDate = c.EndDate,
+                    CourseType = c.CourseType,
+                    ModuleId = c.ModuleId,
+                    PersonCourses = c.PersonCourses.Select(pc => new PersonCourse
+                    {
+                        CourseId = pc.CourseId,
+                        PersonId = pc.PersonId,
+                        Status = pc.Status
+                    }).ToList()
+                })
+                .OrderBy(x => x.StartDate).ThenBy(x => x.EndDate)
+                .ToListAsync();
+
 
             var newCourses = new List<Course>();
 
@@ -135,12 +176,50 @@ namespace DEP.Repository.Repositories
 
         public Task<Course> GetCourseById(int id)
         {
-            var course = context.Courses.Include(x => x.PersonCourses).ThenInclude(x => x.Person)
-                .Include(x => x.Module)
-                .FirstOrDefaultAsync(x => x.CourseId == id);
+            var course = context.Courses
+                .Where(x => x.CourseId == id)
+                .Select(x => new Course
+                {
+                    CourseId = x.CourseId,
+                    CourseNumber = x.CourseNumber,
+                    StartDate = x.StartDate,
+                    EndDate = x.EndDate,
+                    CourseType = x.CourseType,
+                    ModuleId = x.ModuleId,
+                    Module = new Module
+                    {
+                        ModuleId = x.Module.ModuleId,
+                        Name = x.Module.Name
+                    },
+                    PersonCourses = x.PersonCourses.Select(pc => new PersonCourse
+                    {
+                        PersonId = pc.PersonId,
+                        CourseId = pc.CourseId,
+                        Status = pc.Status,
+                        Person = pc.Person == null ? null : new Person
+                        {
+                            PersonId = pc.Person.PersonId,
+                            Name = pc.Person.Name,
+                            Initials = pc.Person.Initials,
+                            Department = pc.Person.Department == null ? null : new Department
+                            {
+                                DepartmentId = pc.Person.Department.DepartmentId,
+                                Name = pc.Person.Department.Name
+                            },
+                            Location = pc.Person.Location == null ? null : new Location
+                            {
+                                LocationId = pc.Person.Location.LocationId,
+                                Name = pc.Person.Location.Name
+                            }
+                        }
+                    }).ToList()
+                })
+                .FirstOrDefaultAsync();
 
             return course;
         }
+
+
 
         public async Task<bool> UpdateCourse(Course course)
         {
@@ -153,9 +232,47 @@ namespace DEP.Repository.Repositories
         public async Task<List<Course>> GetCourseWithPerson(int moduleId)
         {
             return await context.Courses
-                .Include(c => c.PersonCourses).ThenInclude(pc => pc.Person).ThenInclude(p => p.Department)
-                .Include(c => c.PersonCourses).ThenInclude(pc => pc.Person).ThenInclude(p => p.Location)
-                .Where(c => c.ModuleId == moduleId).ToListAsync();
+                .Where(c => c.ModuleId == moduleId)
+                .Select(c => new Course
+                {
+                    CourseId = c.CourseId,
+                    CourseNumber = c.CourseNumber,
+                    ModuleId = c.ModuleId,
+                    StartDate = c.StartDate,
+                    EndDate = c.EndDate,
+                    CourseType = c.CourseType,
+                    PersonCourses = c.PersonCourses.Select(pc => new PersonCourse
+                    {
+                        PersonId = pc.PersonId,
+                        CourseId = pc.CourseId,
+                        Status = pc.Status,
+                        Person = pc.Person == null ? null : new Person
+                        {
+                            PersonId = pc.Person.PersonId,
+                            Name = pc.Person.Name,
+                            Initials = pc.Person.Initials,
+                            DepartmentId = pc.Person.DepartmentId,
+                            LocationId = pc.Person.LocationId,
+                            EducationalConsultantId = pc.Person.EducationalConsultantId,
+                            EducationalLeaderId = pc.Person.EducationalLeaderId,
+                            OperationCoordinatorId = pc.Person.OperationCoordinatorId,
+                            HiringDate = pc.Person.HiringDate,
+                            EndDate = pc.Person.EndDate,
+                            SvuEligible = pc.Person.SvuEligible,
+                            SvuApplied = pc.Person.SvuApplied,
+                            Department = pc.Person.Department == null ? null : new Department
+                            {
+                                DepartmentId = pc.Person.Department.DepartmentId,
+                                Name = pc.Person.Department.Name
+                            },
+                            Location = pc.Person.Location == null ? null : new Location
+                            {
+                                LocationId = pc.Person.Location.LocationId,
+                                Name = pc.Person.Location.Name
+                            }
+                        }
+                    }).ToList()
+                }).ToListAsync();
         }
     }
 }

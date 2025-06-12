@@ -37,7 +37,7 @@ namespace DEP.Repository.Context
             base.OnConfiguring(optionsBuilder);
             // For SKP laptops.
             //optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB; Initial Catalog=DEP; Integrated Security=True; TrustServerCertificate=True;");
-            optionsBuilder.UseSqlServer("Data Source=localhost; Initial Catalog=DEP; Integrated Security=True; TrustServerCertificate=True;");
+            optionsBuilder.UseSqlServer("Data Source=.; Initial Catalog=DEPEncryptionTEST1; Integrated Security=True; TrustServerCertificate=True;");
 
         }
 

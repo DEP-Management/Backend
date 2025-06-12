@@ -18,9 +18,37 @@ namespace DEP.Repository.Repositories
         public async Task<List<User>> GetUsers()
         {
             return await context.Users
-                .Include(u => u.Department)
-                .Include(u => u.Location)
-                .Include(u => u.EducationBoss)
+                .Select(u => new User
+                {
+                    UserId = u.UserId,
+                    UserName = u.UserName,
+                    Name = u.Name,
+                    DepartmentId = u.DepartmentId,
+                    LocationId = u.LocationId,
+                    EducationBossId = u.EducationBossId,
+                    UserRole = u.UserRole,
+                    PasswordHash = u.PasswordHash,
+                    PasswordSalt = u.PasswordSalt,
+                    PasswordExpiryDate = u.PasswordExpiryDate,
+                    RefreshToken = u.RefreshToken,
+                    RefreshTokenExpiryDate = u.RefreshTokenExpiryDate,
+                    Department = u.Department == null ? null : new Department
+                    {
+                        DepartmentId = u.Department.DepartmentId,
+                        Name = u.Department.Name
+                    },
+                    Location = u.Location == null ? null : new Location
+                    {
+                        LocationId = u.Location.LocationId,
+                        Name = u.Location.Name
+                    },
+                    EducationBoss = u.EducationBoss == null ? null : new User
+                    {
+                        UserId = u.EducationBoss.UserId,
+                        UserName = u.EducationBoss.UserName,
+                        Name = u.EducationBoss.Name
+                    }
+                })
                 .ToListAsync();
         }
 
@@ -32,7 +60,18 @@ namespace DEP.Repository.Repositories
                 {
                     UserId = el.UserId,
                     Name = el.Name,
-                    UserRole = el.UserRole
+                    UserRole = el.UserRole,
+                    Department = el.Department == null ? null : new Department
+                    {
+                        DepartmentId = el.Department.DepartmentId,
+                        Name = el.Department.Name
+                    },
+                    Location = el.Location == null ? null : new Location
+                    {
+                        LocationId = el.Location.LocationId,
+                        Name = el.Location.Name
+                    },
+
                 })
                 .FirstOrDefaultAsync();
         }
@@ -40,7 +79,7 @@ namespace DEP.Repository.Repositories
 
         public async Task<List<User>> GetEducationBossesExcel()
         {
-            return await context.Users
+            var test = await context.Users
                 .Where(u => u.UserRole == UserRole.Uddannelseschef)
                 .Select(eb => new User
                 {
@@ -52,11 +91,23 @@ namespace DEP.Repository.Repositories
                         {
                             UserId = el.UserId,
                             Name = el.Name,
-                            UserRole = el.UserRole
+                            UserRole = el.UserRole,
+                            Department = el.Department == null ? null : new Department
+                            {
+                                DepartmentId = el.Department.DepartmentId,
+                                Name = el.Department.Name
+                            },
+                            Location = el.Location == null ? null : new Location
+                            {
+                                LocationId = el.Location.LocationId,
+                                Name = el.Location.Name
+                            },
                         })
                         .ToList()
                 })
                 .ToListAsync();
+
+            return test;
         }
 
 
@@ -74,7 +125,17 @@ namespace DEP.Repository.Repositories
                         {
                             UserId = el.UserId,
                             Name = el.Name,
-                            UserRole = el.UserRole
+                            UserRole = el.UserRole,
+                            Department = el.Department == null ? null : new Department
+                            {
+                                DepartmentId = el.Department.DepartmentId,
+                                Name = el.Department.Name
+                            },
+                            Location = el.Location == null ? null : new Location
+                            {
+                                LocationId = el.Location.LocationId,
+                                Name = el.Location.Name
+                            },
                         })
                         .ToList()
                 })
@@ -84,19 +145,75 @@ namespace DEP.Repository.Repositories
 
         public async Task<List<User>> GetUsersByEducationBossId(int id)
         {
-            return await context.Users.Where(x => x.EducationBossId == id).Include(x => x.Department).Include(x => x.Location).ToListAsync();
+            return await context.Users
+                .Where(x => x.EducationBossId == id)
+                .Select(u => new User
+                {
+                    UserId = u.UserId,
+                    UserName = u.UserName,
+                    Name = u.Name,
+                    DepartmentId = u.DepartmentId,
+                    LocationId = u.LocationId,
+                    EducationBossId = u.EducationBossId,
+                    UserRole = u.UserRole,
+                    Department = u.Department == null ? null : new Department
+                    {
+                        DepartmentId = u.Department.DepartmentId,
+                        Name = u.Department.Name
+                    },
+                    Location = u.Location == null ? null : new Location
+                    {
+                        LocationId = u.Location.LocationId,
+                        Name = u.Location.Name
+                    }
+                })
+                .ToListAsync();
         }
+
 
         public async Task<List<User>> GetUsersByUserRole(UserRole userRole)
         {
+            var query = context.Users
+                .Where(x => x.UserRole == userRole);
+
             if (userRole == UserRole.Uddannelsesleder)
             {
-                return await context.Users.Where(x => x.UserRole == userRole).Include(x => x.Department).Include(x => x.Location).ToListAsync();
+                return await query
+                    .Select(u => new User
+                    {
+                        UserId = u.UserId,
+                        UserName = u.UserName,
+                        Name = u.Name,
+                        UserRole = u.UserRole,
+                        DepartmentId = u.DepartmentId,
+                        LocationId = u.LocationId,
+                        EducationBossId = u.EducationBossId,
+                        Department = u.Department == null ? null : new Department
+                        {
+                            DepartmentId = u.Department.DepartmentId,
+                            Name = u.Department.Name
+                        },
+                        Location = u.Location == null ? null : new Location
+                        {
+                            LocationId = u.Location.LocationId,
+                            Name = u.Location.Name
+                        }
+                    })
+                    .ToListAsync();
             }
-            else
-            {
-                return await context.Users.Where(x => x.UserRole == userRole).ToListAsync();
-            }
+
+            return await query
+                .Select(u => new User
+                {
+                    UserId = u.UserId,
+                    UserName = u.UserName,
+                    Name = u.Name,
+                    UserRole = u.UserRole,
+                    DepartmentId = u.DepartmentId,
+                    LocationId = u.LocationId,
+                    EducationBossId = u.EducationBossId,
+                })
+                .ToListAsync();
         }
 
         public async Task<User> GetUserById(int id)
