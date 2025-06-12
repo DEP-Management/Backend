@@ -151,6 +151,7 @@ namespace DEP.Service.Services
             //user.Name = encryptionService.Decrypt(user.Name);
             var name = encryptionService.Decrypt(user.Name);
 
+
             // Adding claims, claims are Key-Value pairs that can be used after the token is decoded.
             List<Claim> claims = new List<Claim>
             {
