@@ -79,7 +79,7 @@ namespace DEP.Service.Services
         {
             var users = await userRepository.GetUsers();
 
-            UserEncryptionHelper.Decrypt(users, encryptionService);
+            UserEncryptionHelper.DecryptNames(users, encryptionService);
 
             var existingUser = users.FirstOrDefault(x => x.UserName == username);
 
