@@ -225,8 +225,6 @@ namespace DEP.Service.Services
         {
             var bosses = await userRepository.GetEducationBossesExcel();
 
-            UserEncryptionHelper.Decrypt(bosses, encryptionService);
-
             var viewModel = new List<EducationBossViewModel>();
 
             foreach (var boss in bosses)
@@ -235,9 +233,7 @@ namespace DEP.Service.Services
                 // Fetch leaders under this boss
                 foreach (var leader in boss.EducationLeaders)
                 {
-                    //UserEncryptionHelper.Decrypt(boss.EducationLeaders, encryptionService);
                     var persons = await personRepository.GetPersonsExcel(leader.UserId);
-                    //PersonEncryptionHelper.Decrypt(persons, encryptionService);
                     var EducationalleaderViewModel = new EducationLeaderViewModel
                     {
                         UserId = leader.UserId,
@@ -262,6 +258,8 @@ namespace DEP.Service.Services
                 viewModel.Add(bossViewModel);
             }
 
+            UserEncryptionHelper.DecryptEducationBossViewModels(viewModel, encryptionService);
+
             return viewModel;
         }
 
@@ -269,11 +267,15 @@ namespace DEP.Service.Services
         {
             var boss = await userRepository.GetEducationBossByIdExcel(id);
 
+            var bossViewModels = new List<EducationBossViewModel>();
+
             var viewModel = new EducationBossViewModel
             {
                 UserId = boss.UserId,
                 Name = boss.Name,
             };
+
+            bossViewModels.Add(viewModel);
 
             // Fetch leaders under this boss
             foreach (var leader in boss.EducationLeaders)
@@ -294,7 +296,9 @@ namespace DEP.Service.Services
                 viewModel.EducationalLeaders.Add(leaderViewModel);
             }
 
-            return new List<EducationBossViewModel> { viewModel };
+            UserEncryptionHelper.DecryptEducationBossViewModels(bossViewModels, encryptionService);
+
+            return bossViewModels;
         }
 
         public async Task<List<EducationLeaderViewModel>> GetSelectedEducationLeaderExcel(int id)
@@ -302,7 +306,9 @@ namespace DEP.Service.Services
             var leader = await userRepository.GetEducationLeaderByIdExcel(id);
             var persons = await personRepository.GetPersonsExcel(leader.UserId);
 
-            var leaderViewModel = new EducationLeaderViewModel
+            var leaderViewModels = new List<EducationLeaderViewModel>();
+
+            var viewModel = new EducationLeaderViewModel
             {
                 UserId = leader.UserId,
                 Name = leader.Name,
@@ -313,7 +319,12 @@ namespace DEP.Service.Services
                 Teachers = persons
             };
 
-            return new List<EducationLeaderViewModel> { leaderViewModel };
+            leaderViewModels.Add(viewModel);
+
+            UserEncryptionHelper.DecryptEducationLeaderViewModels(leaderViewModels, encryptionService);
+
+            //return new List<EducationLeaderViewModel> { viewModel };
+            return leaderViewModels;
         }
 
     }

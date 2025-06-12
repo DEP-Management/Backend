@@ -39,7 +39,7 @@ namespace DEP.Service.EncryptionHelpers
         }
 
         // For list of courses with persons
-        public static void DecryptCoursesWithPersons(List<ModuleWithCourseViewModel> modules, IEncryptionService encryptionService)
+        public static void DecryptModuleCoursesWithPersons(List<ModuleWithCourseViewModel> modules, IEncryptionService encryptionService)
         {
             var decryptedDepartments = new HashSet<Department>();
             var decryptedLocations = new HashSet<Location>();
@@ -100,6 +100,64 @@ namespace DEP.Service.EncryptionHelpers
                     }
                 }
             }
+
+
+        }
+
+        public static void DecryptCoursesWithPersons(List<Course> courses, IEncryptionService encryptionService)
+        {
+            var decryptedDepartments = new HashSet<Department>();
+            var decryptedLocations = new HashSet<Location>();
+            var decryptedUsers = new HashSet<User>();
+            var decryptedPersons = new HashSet<Person>();
+
+
+                foreach (var course in courses)
+                {
+                    foreach (var pc in course.PersonCourses)
+                    {
+                        if (pc.Person != null && !decryptedPersons.Contains(pc.Person))
+                        {
+                            if (pc.Person.Name != null)
+                                pc.Person.Name = encryptionService.Decrypt(pc.Person.Name);
+
+                            if (pc.Person.Initials != null)
+                                pc.Person.Initials = encryptionService.Decrypt(pc.Person.Initials);
+
+                            decryptedPersons.Add(pc.Person);
+                        }
+
+                        if (pc.Person.Department != null && !decryptedDepartments.Contains(pc.Person.Department))
+                        {
+                            DepartmentEncryptionHelper.Decrypt(pc.Person.Department, encryptionService);
+                            decryptedDepartments.Add(pc.Person.Department);
+                        }
+
+                        if (pc.Person.Location != null && !decryptedLocations.Contains(pc.Person.Location))
+                        {
+                            LocationEncryptionHelper.Decrypt(pc.Person.Location, encryptionService);
+                            decryptedLocations.Add(pc.Person.Location);
+                        }
+
+                        if (pc.Person.OperationCoordinator != null && !decryptedUsers.Contains(pc.Person.OperationCoordinator))
+                        {
+                            UserEncryptionHelper.DecryptUpdatableFields(pc.Person.OperationCoordinator, encryptionService);
+                            decryptedUsers.Add(pc.Person.OperationCoordinator);
+                        }
+
+                        if (pc.Person.EducationalConsultant != null && !decryptedUsers.Contains(pc.Person.EducationalConsultant))
+                        {
+                            UserEncryptionHelper.DecryptUpdatableFields(pc.Person.EducationalConsultant, encryptionService);
+                            decryptedUsers.Add(pc.Person.EducationalConsultant);
+                        }
+
+                        if (pc.Person.EducationalLeader != null && !decryptedUsers.Contains(pc.Person.EducationalLeader))
+                        {
+                            UserEncryptionHelper.DecryptUpdatableFields(pc.Person.EducationalLeader, encryptionService);
+                            decryptedUsers.Add(pc.Person.EducationalLeader);
+                        }
+                    }
+                }
 
 
         }
