@@ -201,6 +201,7 @@ namespace DEP.Repository.Repositories
                             PersonId = pc.Person.PersonId,
                             Name = pc.Person.Name,
                             Initials = pc.Person.Initials,
+                            EndDate = pc.Person.EndDate,
                             Department = pc.Person.Department == null ? null : new Department
                             {
                                 DepartmentId = pc.Person.Department.DepartmentId,

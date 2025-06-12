@@ -51,7 +51,7 @@ namespace DEP.Service.Services
                 modules.Add(excelModules);
             }
 
-            PersonEncryptionHelper.DecryptCoursesWithPersons(modules, encryptionService);
+            PersonEncryptionHelper.DecryptModuleCoursesWithPersons(modules, encryptionService);
 
             return modules;
         }
@@ -72,7 +72,7 @@ namespace DEP.Service.Services
             };
             modules.Add(excelModules);
 
-            PersonEncryptionHelper.DecryptCoursesWithPersons(modules, encryptionService);
+            PersonEncryptionHelper.DecryptModuleCoursesWithPersons(modules, encryptionService);
 
             return modules;
         }

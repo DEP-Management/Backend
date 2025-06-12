@@ -4,13 +4,19 @@ using DEP.Service.Interfaces;
 using System.Reflection;
 using System;
 using DEP.Service.ViewModels;
+using DEP.Service.EncryptionHelpers;
 
 namespace DEP.Service.Services
 {
     public class CourseService : ICourseService
     {
         private readonly ICourseRepository repo;
-        public CourseService(ICourseRepository repo) { this.repo = repo; }
+        private readonly IEncryptionService encryptionService;
+        public CourseService(ICourseRepository repo, IEncryptionService encryptionService)
+        {
+            this.repo = repo;
+            this.encryptionService = encryptionService;
+        }
 
         public async Task<List<Course>> GetAllCourses()
         {
@@ -59,8 +65,12 @@ namespace DEP.Service.Services
         
         public async Task<List<Course>> GetSelectedCourseById(int id)
         {
-            var courseList = new List<Course>();
-            courseList.Add(await repo.GetCourseById(id));
+            var course = await repo.GetCourseById(id);
+
+            var courseList = new List<Course> { course };
+
+            PersonEncryptionHelper.DecryptCoursesWithPersons(courseList, encryptionService);
+            //courseList.Add(await repo.GetCourseById(id));
             return courseList;
         }
 
