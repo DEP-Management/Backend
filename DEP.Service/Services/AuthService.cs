@@ -148,19 +148,20 @@ namespace DEP.Service.Services
 
         public string CreateJwtToken(User user)
         {
-            user.Name = encryptionService.Decrypt(user.Name);
+            //user.Name = encryptionService.Decrypt(user.Name);
+            var name = encryptionService.Decrypt(user.Name);
 
             // Adding claims, claims are Key-Value pairs that can be used after the token is decoded.
             List<Claim> claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Role, user.UserRole.ToString()),
                 new Claim("userId", user.UserId.ToString()),
-                new Claim(ClaimTypes.Name, user.Name.ToString()),
+                new Claim(ClaimTypes.Name, name.ToString()),
                 //new Claim(ClaimTypes.NameIdentifier, user.Name.ToString()),
                 new Claim("roleId", ((int)user.UserRole).ToString())
             };
 
-            user.Name = encryptionService.Encrypt(user.Name);
+            //user.Name = encryptionService.Encrypt(user.Name);
             var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetSection("AppSettings:Token").Value));
             var signInCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
             var tokeOptions = new JwtSecurityToken(

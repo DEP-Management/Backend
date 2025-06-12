@@ -5,6 +5,7 @@ using DEP.Service.EncryptionHelpers;
 using DEP.Service.Interfaces;
 using DEP.Service.ViewModels;
 using Microsoft.Extensions.Configuration;
+using System.Collections;
 
 namespace DEP.Service.Services
 {
@@ -33,6 +34,11 @@ namespace DEP.Service.Services
         public async Task<List<User>> GetUsers()
         {
             var users = await userRepository.GetUsers();
+            foreach (var user in users)
+            {
+                user.PasswordHash = new byte[32];
+                user.PasswordSalt = new byte[32];
+            }
             UserEncryptionHelper.Decrypt(users, encryptionService);
             return users;
         }
@@ -230,6 +236,8 @@ namespace DEP.Service.Services
                         Name = leader.Name,
                         UserRole = leader.UserRole,
                         EducationBossId = boss.UserId,
+                        Location = leader.Location,
+                        Department = leader.Department,
                         Teachers = persons.ToList()
                     };
 
@@ -270,6 +278,8 @@ namespace DEP.Service.Services
                     Name = leader.Name,
                     UserRole = leader.UserRole,
                     EducationBossId = boss.UserId,
+                    Location = leader.Location,
+                    Department = leader.Department,
                     Teachers = persons.ToList()
                 };
 
@@ -290,6 +300,8 @@ namespace DEP.Service.Services
                 Name = leader.Name,
                 UserRole = leader.UserRole,
                 EducationBossId = leader.EducationBossId,
+                Location = leader.Location,
+                Department = leader.Department,
                 Teachers = persons
             };
 

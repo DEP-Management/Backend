@@ -34,7 +34,24 @@ namespace DEP.Repository.Repositories
 
         public async Task<List<Module>> GetModules()
         {
-            var modules = await context.Modules.Include(m => m.Books).ToListAsync();
+            var modules = await context.Modules
+                .Select(m => new Module
+                {
+                    ModuleId = m.ModuleId,
+                    Name = m.Name,
+                    Description = m.Description,
+                    Books = m.Books
+                        .Select(b => new Book
+                        {
+                            BookId = b.BookId,
+                            ModuleId = b.ModuleId,
+                            Name = b.Name,
+                            Amount = b.Amount
+                        })
+                        .ToList()
+                })
+                .ToListAsync();
+
             return modules;
         }
 
