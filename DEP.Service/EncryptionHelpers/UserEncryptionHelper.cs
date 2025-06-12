@@ -1,6 +1,7 @@
 ﻿using DEP.Repository.Models;
 using DEP.Repository.ViewModels;
 using DEP.Service.Interfaces;
+using DEP.Service.ViewModels;
 
 namespace DEP.Service.EncryptionHelpers
 {
@@ -208,6 +209,57 @@ namespace DEP.Service.EncryptionHelpers
 
                 if (!string.IsNullOrEmpty(person.LocationName))
                     person.LocationName = encryptionService.Decrypt(person.LocationName);
+            }
+        }
+
+
+        public static void DecryptEducationBossViewModel(List<EducationBossViewModel> educationBosses, IEncryptionService encryptionService)
+        {
+            var decryptedDepartments = new HashSet<Department>();
+            var decryptedLocations = new HashSet<Location>();
+            var decryptedEducationLeaders = new HashSet<EducationLeaderViewModel>();
+            var decryptedPersons = new HashSet<Person>();
+
+            foreach (var boss in educationBosses)
+            {
+                if (!string.IsNullOrEmpty(boss.Name))
+                    boss.Name = encryptionService.Decrypt(boss.Name);
+
+                foreach (var leader in boss.EducationalLeaders)
+                {
+                    if (!string.IsNullOrEmpty(leader.Name))
+                        leader.Name = encryptionService.Decrypt(leader.Name);
+
+                    if (leader.Department != null && !string.IsNullOrEmpty(leader.Department.Name) && !decryptedDepartments.Contains(leader.Department))
+                    {
+                        encryptionService.Decrypt(leader.Department.Name);
+                        decryptedDepartments.Add(leader.Department);
+                    }
+
+                    if (leader.Location != null && !string.IsNullOrEmpty(leader.Location.Name) && !decryptedLocations.Contains(leader.Location))
+                    {
+                        encryptionService.Decrypt(leader.Location.Name);
+                        decryptedLocations.Add(leader.Location);
+                    }
+
+                    foreach (var teacher in leader.Teachers)
+                    {
+                        if (!string.IsNullOrEmpty(teacher.Name))
+                            teacher.Name = encryptionService.Decrypt(teacher.Name);
+
+                        if (teacher.Department != null && !string.IsNullOrEmpty(teacher.Department.Name) && !decryptedDepartments.Contains(leader.Department))
+                        {
+                            encryptionService.Decrypt(leader.Department.Name);
+                            decryptedDepartments.Add(leader.Department);
+                        }
+
+                        if (leader.Location != null && !string.IsNullOrEmpty(leader.Location.Name) && !decryptedLocations.Contains(leader.Location))
+                        {
+                            encryptionService.Decrypt(leader.Location.Name);
+                            decryptedLocations.Add(leader.Location);
+                        }
+                    }
+                }
             }
         }
     }

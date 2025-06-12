@@ -231,7 +231,7 @@ namespace DEP.Service.Services
                 {
                     //UserEncryptionHelper.Decrypt(boss.EducationLeaders, encryptionService);
                     var persons = await personRepository.GetPersonsExcel(leader.UserId);
-                    //PersonEncryptionHelper.Decrypt(persons, encryptionService);
+                    PersonEncryptionHelper.Decrypt(persons, encryptionService);
                     var EducationalleaderViewModel = new EducationLeaderViewModel
                     {
                         UserId = leader.UserId,
