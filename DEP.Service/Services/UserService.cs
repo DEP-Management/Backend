@@ -77,7 +77,15 @@ namespace DEP.Service.Services
 
         public async Task<User> GetUserByUsername(string username)
         {
-            return await userRepository.GetUserByUsername(username);
+            var users = await userRepository.GetUsers();
+
+            UserEncryptionHelper.DecryptNames(users, encryptionService);
+
+            var existingUser = users.FirstOrDefault(x => x.UserName == username);
+
+            UserEncryptionHelper.EncryptNames(users, encryptionService);
+
+            return existingUser;
         }
 
         public async Task<UserViewModel> AddUser(AddUserViewModel viewModel)
