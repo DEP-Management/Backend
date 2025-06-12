@@ -13,9 +13,23 @@ namespace DEP.Repository.Repositories
 
         public async Task<List<FileTag>> GetAllFileTag()
         {
-            var filetags = await context.FileTags.Include(ft => ft.FileTagUserRoles).ToListAsync();
+            var filetags = await context.FileTags
+                .Select(ft => new FileTag
+                {
+                    FileTagId = ft.FileTagId,
+                    TagName = ft.TagName,
+                    FileTagUserRoles = ft.FileTagUserRoles
+                        .Select(ur => new FileTagUserRole
+                        {
+                            FileTagId = ur.FileTagId,
+                            Role = ur.Role
+                        })
+                        .ToList()
+                })
+                .ToListAsync();
+
             return filetags;
-        }       
+        }
 
         public async Task<FileTag> GetFileTagByID(int id)
         {
@@ -39,8 +53,21 @@ namespace DEP.Repository.Repositories
         public async Task<bool> UpdateFileTag(FileTag fileTag)
         {
             var existingFileTag = await context.FileTags
-                .Include(ft => ft.FileTagUserRoles) // Ensure roles are loaded
-                .FirstOrDefaultAsync(ft => ft.FileTagId == fileTag.FileTagId);
+            .Where(ft => ft.FileTagId == fileTag.FileTagId)
+            .Select(ft => new FileTag
+            {
+                FileTagId = ft.FileTagId,
+                TagName = ft.TagName,
+                FileTagUserRoles = ft.FileTagUserRoles
+                    .Select(ur => new FileTagUserRole
+                    {
+                        FileTagId = ur.FileTagId,
+                        Role = ur.Role
+                    })
+                    .ToList()
+            })
+            .FirstOrDefaultAsync();
+
 
             if (existingFileTag == null) return false;
 
