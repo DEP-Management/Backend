@@ -174,5 +174,46 @@ namespace DEP.Repository.Repositories
             await context.SaveChangesAsync();
             return personCourse;
         }
+
+        public async Task<List<PersonCourse>> GetPersonCoursesFiltered(int? moduleId, DateTime? fromDate, DateTime? toDate)
+        {
+            var query = context.PersonCourses.AsQueryable();
+
+            if (moduleId.HasValue)
+                query = query.Where(pc => pc.Course != null && pc.Course.ModuleId == moduleId.Value);
+
+            if (fromDate.HasValue || toDate.HasValue)
+            {
+                query = query.Where(pc =>
+                    pc.Course != null &&
+                    (
+                        (!fromDate.HasValue || pc.Course.EndDate >= fromDate.Value) &&
+                        (!toDate.HasValue || pc.Course.StartDate <= toDate.Value)
+                    )
+                );
+            }
+
+            return await query
+                .Select(pc => new PersonCourse
+                {
+                    PersonId = pc.PersonId,
+                    CourseId = pc.CourseId,
+                    Status = pc.Status,
+                    Course = pc.Course == null ? null : new Course
+                    {
+                        CourseId = pc.Course.CourseId,
+                        StartDate = pc.Course.StartDate,
+                        EndDate = pc.Course.EndDate,
+                        ModuleId = pc.Course.ModuleId,
+                        Module = pc.Course.Module == null ? null : new Module
+                        {
+                            ModuleId = pc.Course.Module.ModuleId,
+                            Name = pc.Course.Module.Name,
+                            Description = pc.Course.Module.Description
+                        }
+                    }
+                })
+                .ToListAsync();
+        }
     }
 }

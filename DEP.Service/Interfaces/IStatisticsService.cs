@@ -1,4 +1,5 @@
-﻿using DEP.Service.ViewModels.Statistic;
+﻿using DEP.Repository.ViewModels;
+using DEP.Service.ViewModels.Statistic;
 
 namespace DEP.Service.Interfaces
 {
@@ -8,6 +9,9 @@ namespace DEP.Service.Interfaces
         Task<List<PersonPerDepartmentViewModel>> GetPersonsPerDepartment();
         Task<List<PersonPerLocationViewModel>> GetPersonsPerLocation();
         Task<List<CourseStatusCountViewModel>> GetCourseStatusCountByModule(int moduleId);
+        Task<List<CourseStatusCountViewModel>> GetCourseStatusCountFiltered(CourseStatusFilterViewModel filter);
         Task<PersonPerDepartmentAndLocationViewModel> GetPersonsPerDepartmentAndLocation();
+        Task<List<PersonPerDepartmentViewModel>> GetPersonsPerModuleAsync();
+        Task<List<PersonPerDepartmentViewModel>> GetPersonsPerModuleIncludingEmptyModulesAsync();
     }
 }
