@@ -18,6 +18,8 @@ namespace DEP.Test.Services
         private readonly Mock<ILocationRepository> mockLocationRepo = new();
         private readonly Mock<IPersonCourseRepository> mockPersonCourseRepo = new();
         private readonly Mock<IEncryptionService> mockEncryption = new();
+        private readonly Mock<ICourseRepository> mockCourseRepo = new();
+        private readonly Mock<IModuleRepository> mockModuleRepo = new();
 
         private readonly StatisticsService service;
 
@@ -28,7 +30,9 @@ namespace DEP.Test.Services
                 mockDepartmentRepo.Object,
                 mockLocationRepo.Object,
                 mockPersonCourseRepo.Object,
-                mockEncryption.Object
+                mockEncryption.Object,
+                mockCourseRepo.Object,
+                mockModuleRepo.Object
             );
         }
 

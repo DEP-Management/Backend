@@ -74,6 +74,20 @@ builder.Services.AddScoped<IPersonCourseService, PersonCourseService>();
 builder.Services.AddScoped<IStatisticsService, StatisticsService>();
 builder.Services.AddScoped<IEncryptionService, EncryptionService>();
 
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowLocalhost",
+        policy =>
+        {
+            policy.WithOrigins("https://snixert.dk")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials()      // Add this if you want to allow credentials
+                  .WithExposedHeaders("Content-Disposition");
+        });
+});
+
 builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 var app = builder.Build();
 
@@ -86,7 +100,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().WithExposedHeaders("Content-Disposition"));
+
+//app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().WithExposedHeaders("Content-Disposition"));
+app.UseCors("AllowLocalhost");
+
 
 app.UseAuthentication();
 
