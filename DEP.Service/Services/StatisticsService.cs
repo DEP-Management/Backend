@@ -1,5 +1,7 @@
 ﻿using DEP.Repository.Interfaces;
 using DEP.Repository.Models;
+using DEP.Repository.Repositories;
+using DEP.Repository.ViewModels;
 using DEP.Service.EncryptionHelpers;
 using DEP.Service.Interfaces;
 using DEP.Service.ViewModels.Statistic;
@@ -13,14 +15,18 @@ namespace DEP.Service.Services
         private readonly ILocationRepository locationRepository;
         private readonly IPersonCourseRepository personCourseRepository;
         private readonly IEncryptionService encryptionService;
+        private readonly ICourseRepository courseRepository;
+        private readonly IModuleRepository moduleRepository;
 
-        public StatisticsService(IPersonRepository personRepository, IDepartmentRepository departmentRepository, ILocationRepository locationRepository, IPersonCourseRepository personCourseRepository, IEncryptionService encryptionService)
+        public StatisticsService(IPersonRepository personRepository, IDepartmentRepository departmentRepository, ILocationRepository locationRepository, IPersonCourseRepository personCourseRepository, IEncryptionService encryptionService, ICourseRepository courseRepository, IModuleRepository moduleRepository)
         {
             this.personRepository = personRepository;
             this.departmentRepository = departmentRepository;
             this.locationRepository = locationRepository;
             this.personCourseRepository = personCourseRepository;
             this.encryptionService = encryptionService;
+            this.courseRepository = courseRepository;
+            this.moduleRepository = moduleRepository;
         }
 
         public async Task<List<PersonPerDepartmentViewModel>> GetPersonsPerDepartmentByModule(int moduleId)
@@ -192,6 +198,29 @@ namespace DEP.Service.Services
             return result;
         }
 
+        public async Task<List<CourseStatusCountViewModel>> GetCourseStatusCountFiltered(CourseStatusFilterViewModel filter)
+        {
+            var personCourses = await personCourseRepository.GetPersonCoursesFiltered(filter.ModuleId, filter.FromDate, filter.ToDate);
+
+            var allStatuses = Enum.GetValues(typeof(Status)).Cast<Status>();
+            var statusCounts = allStatuses.ToDictionary(status => status, status => 0);
+
+            foreach (var pc in personCourses)
+            {
+                if (statusCounts.ContainsKey(pc.Status))
+                {
+                    statusCounts[pc.Status]++;
+                }
+            }
+
+            return statusCounts.Select(kvp => new CourseStatusCountViewModel
+            {
+                StatusId = (int)kvp.Key,
+                CourseStatus = kvp.Key.ToString().Replace('_', ' '),
+                PersonCount = kvp.Value
+            }).ToList();
+        }
+
         public async Task<PersonPerDepartmentAndLocationViewModel> GetPersonsPerDepartmentAndLocation()
         {
             var departments = await departmentRepository.GetDepartments();
@@ -283,5 +312,74 @@ namespace DEP.Service.Services
 
             return result;
         }
+
+        public async Task<List<PersonPerDepartmentViewModel>> GetPersonsPerModuleAsync()
+        {
+            var courses = await courseRepository.GetAllCourses(); // Your existing method
+
+            // Flatten person-course relationships with module info
+            var personModulePairs = courses
+                .Where(c => c.Module != null)
+                .SelectMany(c => c.PersonCourses.Select(pc => new
+                {
+                    pc.PersonId,
+                    c.Module!.ModuleId,
+                    c.Module.Name
+                }))
+                .Distinct() // Remove duplicates: same person in multiple courses under same module
+                .ToList();
+
+            // Group by module and count unique persons
+            var result = personModulePairs
+                .GroupBy(x => new { x.ModuleId, x.Name })
+                .Select(g => new PersonPerDepartmentViewModel
+                {
+                    DepartmentId = g.Key.ModuleId,
+                    DepartmentName = g.Key.Name,
+                    TeacherCount = g.Count()
+                })
+                .OrderByDescending(x => x.TeacherCount)
+                .ToList();
+
+            return result;
+        }
+
+        public async Task<List<PersonPerDepartmentViewModel>> GetPersonsPerModuleIncludingEmptyModulesAsync()
+        {
+            var allCourses = await courseRepository.GetAllCourses();
+            var allModules = await moduleRepository.GetModules(); // Needed to include modules without any courses
+
+            // Step 1: Create list of (ModuleId, PersonId) pairs
+            var personModulePairs = allCourses
+                .Where(c => c.Module != null)
+                .SelectMany(c => c.PersonCourses.Select(pc => new
+                {
+                    pc.PersonId,
+                    c.Module!.ModuleId
+                }))
+                //.Distinct()
+                .ToList();
+
+            // Step 2: Count unique persons per module
+            var countsPerModule = personModulePairs
+                .GroupBy(x => x.ModuleId)
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            // Step 3: Build final list including modules with 0 persons
+            var result = allModules
+                .Select(m => new PersonPerDepartmentViewModel
+                {
+                    DepartmentId = m.ModuleId,
+                    DepartmentName = m.Name,
+                    TeacherCount = countsPerModule.ContainsKey(m.ModuleId)
+                        ? countsPerModule[m.ModuleId]
+                        : 0
+                })
+                .OrderByDescending(x => x.TeacherCount)
+                .ToList();
+
+            return result;
+        }
+
     }
 }

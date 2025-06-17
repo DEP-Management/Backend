@@ -1,4 +1,5 @@
 ﻿using DEP.Repository.Models;
+using DEP.Repository.ViewModels;
 using DEP.Service.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -57,6 +58,17 @@ namespace DEP.Controllers
             return Ok(await service.GetCourseStatusCountByModule(moduleId));
         }
 
+        [HttpPost("coursestatuscount/filter"), Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Human_Resources) + "," +
+    nameof(UserRole.Administrator))]
+        public async Task<IActionResult> GetCourseStatusCountFiltered([FromBody] CourseStatusFilterViewModel filter)
+        {
+            var result = await service.GetCourseStatusCountFiltered(filter);
+            return Ok(result);
+        }
+
         [HttpGet("personsperdepartmentandlocation"), Authorize(Roles =
     nameof(UserRole.Driftskoordinator) + "," +
     nameof(UserRole.Pædagogisk_konsulent) + "," +
@@ -65,6 +77,26 @@ namespace DEP.Controllers
         public async Task<IActionResult> GetPersonsPerDepartmentAndLocation()
         {
             return Ok(await service.GetPersonsPerDepartmentAndLocation());
+        }
+
+        [HttpGet("personspermodule"), Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Human_Resources) + "," +
+    nameof(UserRole.Administrator))]
+        public async Task<IActionResult> GetPersonsPerModule()
+        {
+            return Ok(await service.GetPersonsPerModuleAsync());
+        }
+
+        [HttpGet("personspermoduleincludingempty"), Authorize(Roles =
+    nameof(UserRole.Driftskoordinator) + "," +
+    nameof(UserRole.Pædagogisk_konsulent) + "," +
+    nameof(UserRole.Human_Resources) + "," +
+    nameof(UserRole.Administrator))]
+        public async Task<IActionResult> GetPersonsPerModuleIncludingEmpty()
+        {
+            return Ok(await service.GetPersonsPerModuleIncludingEmptyModulesAsync());
         }
     }
 }

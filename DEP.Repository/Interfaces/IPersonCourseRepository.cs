@@ -11,5 +11,6 @@ namespace DEP.Repository.Interfaces
         Task<bool> AddPersonCourse(PersonCourse personCourse);
         Task<PersonCourse> UpdatePersonCourse(PersonCourse personCourse);
         Task<bool> DeletePersonCourse(int personId, int courseId);
+        Task<List<PersonCourse>> GetPersonCoursesFiltered(int? moduleId, DateTime? fromDate, DateTime? toDate);
     }
 }
