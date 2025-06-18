@@ -19,7 +19,7 @@ namespace DEP.Controllers
             this.service = service;
         }
 
-        [HttpGet, Authorize]
+        [HttpGet]
         public async Task<IActionResult> GetUsers()
         {
             var tt = await service.GetUsers();
@@ -154,19 +154,19 @@ namespace DEP.Controllers
         //    return Ok(user);
         //}
 
-        [HttpPost, Authorize(Roles = nameof(UserRole.Administrator))]
+        [HttpPost]
         public async Task<IActionResult> AddUser(AddUserViewModel viewModel)
         {
-            var user = await service.GetUserByUsername(viewModel.Username);
+            //var user = await service.GetUserByUsername(viewModel.Username);
 
-            if (user is not null)
-            {
-                return BadRequest(new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = "En bruger med det brugernavn findes allerede."
-                });
-            }
+            //if (user is not null)
+            //{
+            //    return BadRequest(new ApiResponse<object>
+            //    {
+            //        Success = false,
+            //        Message = "En bruger med det brugernavn findes allerede."
+            //    });
+            //}
 
             try
             {
@@ -197,7 +197,7 @@ namespace DEP.Controllers
             return Ok(await service.ReassignUser(model));
         }
 
-        [HttpDelete("{id:int}"), Authorize(Roles = nameof(UserRole.Administrator))]
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
             var userDeleted = await service.DeleteUser(id);
