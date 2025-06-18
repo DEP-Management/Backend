@@ -38,7 +38,7 @@ namespace DEP.Repository.Context
             // For SKP laptops.
             //optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB; Initial Catalog=DEP; Integrated Security=True; TrustServerCertificate=True;");
             //optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB; Initial Catalog=DEPEncryption; Integrated Security=True; TrustServerCertificate=True;");
-            optionsBuilder.UseSqlServer("Server=mssql7.unoeuro.com;Database=snixert_dk_db_dep;User Id=snixert_dk;Password=wxfyApGRhzEb5t9g2Bde;Encrypt=True;TrustServerCertificate=True;");
+            optionsBuilder.UseSqlServer("Server=mssql7.unoeuro.com;Database=snixert_dk_db_dep;User Id=snixert_dk;Password=wxfyApGRhzEb5t9g2BdeRhzEb5t9;Encrypt=True;TrustServerCertificate=True;");
 
         }
 
