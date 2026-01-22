@@ -20,6 +20,13 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
+// DB Connection
+builder.Services.AddDbContext<DatabaseContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")
+    )
+);
+
 // Adds authentication function to Swagger, allowing for authentication/authorization testing.
 builder.Services.AddSwaggerGen(options =>
 {
