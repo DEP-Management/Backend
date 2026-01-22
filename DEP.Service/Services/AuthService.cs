@@ -148,7 +148,6 @@ namespace DEP.Service.Services
 
         public string CreateJwtToken(User user)
         {
-            //user.Name = encryptionService.Decrypt(user.Name);
             var name = encryptionService.Decrypt(user.Name);
 
 
